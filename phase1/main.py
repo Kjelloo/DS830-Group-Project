@@ -6,7 +6,7 @@ def load_request(path: str) -> list[dict]:
     into request in a dictionary.
 
     Each request represents a delivery with pickup and delivery
-    coordinates, with a
+    coordinates, with a request time.
 
     The resulting schema for each request is: \n
     {
