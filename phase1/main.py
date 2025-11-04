@@ -117,6 +117,7 @@ def load_request(path: str) -> list[dict]:
 
     return requests
 
+
 def _calculate_distance(x1: float, y1: float, x2: float, y2: float) -> float:
     """
     Calculate the Euclidean distance between two points in a 2D plane.
@@ -132,6 +133,7 @@ def _calculate_distance(x1: float, y1: float, x2: float, y2: float) -> float:
     """
     return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
 
+
 def _get_request_target_coords(req: dict) -> tuple[float, float] | None:
     """
     Return (x, y) target coordinates for the request based on its status.
@@ -145,6 +147,7 @@ def _get_request_target_coords(req: dict) -> tuple[float, float] | None:
     if req['status'] == 'picked':
         return req['dx'], req['dy']
     return None
+
 
 def _move_driver_towards(driver: dict, tx: float, ty: float) -> bool:
     """
@@ -161,6 +164,7 @@ def _move_driver_towards(driver: dict, tx: float, ty: float) -> bool:
     driver['x'] += direction_x * driver['speed']
     driver['y'] += direction_y * driver['speed']
     return False
+
 
 def _calculate_closest_driver(req: dict, drivers: list[dict]) -> dict | None:
     """
@@ -184,6 +188,7 @@ def _calculate_closest_driver(req: dict, drivers: list[dict]) -> dict | None:
                 closest_driver = driver
 
     return closest_driver
+
 
 def simulate_step(state: dict) -> (state, metrics):
     """
@@ -284,6 +289,7 @@ backend = {
     "load_requests": load_request,
 }
 
+
 def _simulate_steps_amount(state: dict, steps: int):
     """
     Run simulate_step `steps` times and return the final (state, metrics).
@@ -300,6 +306,7 @@ def _simulate_steps_amount(state: dict, steps: int):
     print(json.dumps(last_metrics, indent=2))
 
     return current_state, last_metrics
+
 
 if __name__ == "__main__":
     _simulate_steps_amount(state_placeholder, 50)
