@@ -190,7 +190,7 @@ def _calculate_closest_driver(req: dict, drivers: list[dict]) -> dict | None:
     return closest_driver
 
 
-def simulate_step(state: dict) -> (state, metrics):
+def simulate_step(state: dict) -> tuple[dict, dict]:
     """
     Simulate a single time step in the delivery system.
 
