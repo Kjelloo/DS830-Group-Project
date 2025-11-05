@@ -18,6 +18,9 @@ def init_state(drivers, requests, timeout, rate, w, h):
     return state
 
 def simulate_step(state: dict) -> tuple[dict, dict]:
+    """
+    Simulates a step in the simulation.
+    """
     io_mod.generate_requests(state["t"], state["pending"], state["req_rate"])
     assign_requests(state["drivers"], state["pending"])
     handle_transactions(state["drivers"], state["pending"], state)
@@ -38,6 +41,10 @@ def simulate_step(state: dict) -> tuple[dict, dict]:
     return state, metrics
 
 def assign_requests(drivers: list[dict], requests: list[dict]) -> None:
+    """
+    Assigns requests iteratively to drivers if drivers are not busy
+    and if there exists waiting requests.
+    """
     for driver in drivers:
         if driver["target_id"] is None:
             for request in requests:
@@ -52,6 +59,9 @@ def assign_requests(drivers: list[dict], requests: list[dict]) -> None:
                     break
 
 def compute_velocity_vector(driver: dict, velocity: int = 5) -> None:
+    """
+    Computes a velocity vector based on a drivers position and his target.
+    """
     D = (driver["tx"] - driver["x"], driver["ty"] - driver["y"]) # compute direction vector
     D_magnitude = (D[0] ** 2 + D[1] ** 2)**0.5 # compute magnitude of D
     if D_magnitude == 0:
@@ -62,11 +72,20 @@ def compute_velocity_vector(driver: dict, velocity: int = 5) -> None:
     driver["vx"], driver["vy"] = D_velocity # update vx and vx in driver dict
 
 def within_one_step(driver: dict) -> bool:
+    """
+    Boolean function that checks if the drivers distance to his target is less than
+    the distance he can travel within one step. Used as a helper function
+    for handle_transactions - transactions happens if this function returns True.
+    """
     one_step_distance = (driver["vx"]**2 + driver["vy"]**2)**0.5
     actual_distance = ((driver["tx"] - driver["x"])**2 + (driver["ty"] - driver["y"])**2)**0.5
     return actual_distance < one_step_distance
 
 def handle_transactions(drivers: list[dict], requests: list[dict], state: dict) -> None:
+    """
+    Handles pick-ups and drop-offs iteratively. For every driver, the function checks if
+    an order can be picked up or dropped off, if that is the case it does just that.
+    """
     for driver in drivers:
         if driver["target_id"] is not None:
             if within_one_step(driver):
@@ -92,6 +111,9 @@ def handle_transactions(drivers: list[dict], requests: list[dict], state: dict) 
                     state["served_waits"].append(req["t_wait"])
 
 def move_drivers(drivers: list[dict]) -> None:
+    """
+    Moves drivers towards their targets iteratively if a target exists.
+    """
     for driver in drivers:
         if driver["target_id"] is not None:
             # Move one step in target direction
@@ -99,6 +121,10 @@ def move_drivers(drivers: list[dict]) -> None:
             driver["y"] += driver["vy"]
 
 def handle_expirations(state: dict) -> None:
+    """
+    Checks if requests exceed max waiting time (timeout). If that is the case, requests are dropped
+    and drivers are freed up.
+    """
     requests = state["pending"]
     drivers = state["drivers"]
     for request in requests:
@@ -119,6 +145,9 @@ def handle_expirations(state: dict) -> None:
                         })
 
 def update_waits(requests: list[dict]):
+    """
+    Updates the waiting times of drivers iteratively.
+    """
     for request in requests:
         if request["status"] not in ("expired", "delivered"):
             request["t_wait"] += 1
