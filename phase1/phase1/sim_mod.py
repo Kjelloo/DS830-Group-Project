@@ -1,33 +1,54 @@
 from phase1 import io_mod
 
+def init_state(drivers, requests, timeout, req_rate, width, height):
+    """Build the starting simulation state (t = 0) compatible with simulate_step."""
+    ds = [{
+        "id": int(d["id"]),
+        "x": float(d["x"]),
+        "y": float(d["y"]),
+        "speed": float(d.get("speed", 1.0)),
+        "target_id": d.get("target_id", None),
+    } for d in drivers]
 
-def init_state(drivers, requests, timeout, rate, w, h):
-    state = {
+    pending, future = [], []
+    for r in requests:
+        rr = {
+            "id": int(r["id"]),
+            "t": int(r["t"]),
+            "px": int(r["px"]), "py": int(r["py"]),
+            "dx": int(r["dx"]), "dy": int(r["dy"]),
+            "driver_id": None,
+            "status": "waiting",
+            "t_wait": 0,
+        }
+        (pending if rr["t"] <= 0 else future).append(rr)
+
+    return {
         "t": 0,
-        "drivers": drivers,
-        "pending": requests,
-        "future": requests,
+        "drivers": ds,
+        "pending": pending,
+        "future": future,
         "served": 0,
         "expired": 0,
-        "timeout": timeout,
+        "timeout": int(timeout),
         "served_waits": [],
-        "req_rate": rate,
-        "width": w,
-        "height": h
+        "req_rate": float(req_rate),
+        "width": int(width),
+        "height": int(height),
     }
-    return state
 
 def simulate_step(state: dict) -> tuple[dict, dict]:
     """
     Simulates a step in the simulation.
     """
+    state["t"] += 1
     io_mod.generate_requests(state["t"], state["pending"], state["req_rate"])
     assign_requests(state["drivers"], state["pending"])
     handle_transactions(state["drivers"], state["pending"], state)
     move_drivers(state["drivers"])
     update_waits(state["pending"])
     handle_expirations(state)
-    state["t"] += 1
+    # state["t"] += 1
 
     # handle metrics
     metrics = {

@@ -206,6 +206,7 @@ def generate_requests(start_t: int, out_list: list,
     if random.random() < req_per_step:
         req = {
             "id": 0 if largest_id == -1 else largest_id + 1,
+            "t": start_t,
             "px": random.randint(0,width),
             "py": random.randint(0,height),
             "dx": random.randint(0,width),
