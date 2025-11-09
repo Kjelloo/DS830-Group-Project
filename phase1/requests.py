@@ -1,5 +1,6 @@
 import random
 
+
 def load_drivers(path: str) -> list[dict]:
     """
     Manually parse drivers CSV → [{'id', 'x', 'y'}] (ints).
@@ -78,6 +79,7 @@ def load_drivers(path: str) -> list[dict]:
         print(f"Error: The file at path '{path}' was not found.")
         return []
 
+
 def load_requests(path: str) -> list[dict]:
     """
         Load and validate delivery requests from a CSV file, converting them
@@ -153,13 +155,16 @@ def load_requests(path: str) -> list[dict]:
 
     return requests
 
+
 def init_logger(log_dir: str = "logs", filename: str = None) -> None:
     pass
+
 
 def log_event(event_type: str, t: int, driver_id: int, request_id: int, total_distance: float) -> None:
     pass
 
-def generate_drivers(n: int, width: int=50, height: int=30) -> list[dict]:
+
+def generate_drivers(n: int, width: int = 50, height: int = 30) -> list[dict]:
     """
     Generates n drivers randomly for the grid. Used initially to
     generate drivers for the simulation, i.e., n is fixed throughout
@@ -172,9 +177,9 @@ def generate_drivers(n: int, width: int=50, height: int=30) -> list[dict]:
     drivers = []
     for i in range(n):
         drivers.append({
-            "id":i,
-            "x":random.randint(0,width),
-            "y":random.randint(0,height),
+            "id": i,
+            "x": random.randint(0, width),
+            "y": random.randint(0, height),
             "vx": 0,
             "vy": 0,
             "tx": None,
@@ -184,8 +189,9 @@ def generate_drivers(n: int, width: int=50, height: int=30) -> list[dict]:
         })
     return drivers
 
+
 def generate_requests(start_t: int, out_list: list,
-                      req_rate: int, width: int=50, height: int=30) -> None:
+                      req_rate: int, width: int = 50, height: int = 30) -> None:
     """
     Generates delivery requests probabilistically based on req_rate.
     """
@@ -198,8 +204,10 @@ def generate_requests(start_t: int, out_list: list,
     except ValueError:
         return None
     if start_t < 0: return None
-    if type(out_list) == list: pass
-    else: return
+    if type(out_list) == list:
+        pass
+    else:
+        return
     # Probabilistic generation
     req_per_step = req_rate
     largest_id = max((d["id"] for d in out_list), default=-1)
@@ -207,10 +215,10 @@ def generate_requests(start_t: int, out_list: list,
         req = {
             "id": 0 if largest_id == -1 else largest_id + 1,
             "t": start_t,
-            "px": random.randint(0,width),
-            "py": random.randint(0,height),
-            "dx": random.randint(0,width),
-            "dy": random.randint(0,height),
+            "px": random.randint(0, width),
+            "py": random.randint(0, height),
+            "dx": random.randint(0, width),
+            "dy": random.randint(0, height),
             "t_wait": 0,
             "status": "waiting",
             "driver_id": None
@@ -219,7 +227,7 @@ def generate_requests(start_t: int, out_list: list,
 
 
 def main():
-    #Testing 'generate_drivers'
+    # Testing 'generate_drivers'
     print("generate_drivers")
     drivers = generate_drivers(5)
     for i in drivers:
@@ -228,10 +236,11 @@ def main():
     # Testing 'generate_requests'
     print("generate_requests")
     out_list = []
-    generate_requests(0,out_list, 30, 30, 50)
+    generate_requests(0, out_list, 30, 30, 50)
     for i in out_list:
         for key, value in i.items():
             print(key, value)
+
 
 # Run main function if not imported.
 if __name__ == '__main__':
