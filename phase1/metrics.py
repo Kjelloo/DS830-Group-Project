@@ -1,8 +1,9 @@
-import matplotlib.pyplot as plt
 from datetime import datetime
 
+import matplotlib.pyplot as plt
 
-def record_step_to_file(state, metrics, filename="simulation_data.txt") -> None:
+
+def record_step_to_file(state, metrics, filename="simulation_data.csv") -> None:
     """
     Record a single simulation step to a text file.
 
@@ -24,7 +25,7 @@ def record_step_to_file(state, metrics, filename="simulation_data.txt") -> None:
         print(f"Could not write to file: {e}")
 
 
-def start_new_simulation_log(filename="simulation_data.txt") -> None:
+def start_new_simulation_log(filename="simulation_data.csv") -> None:
     """
     Start a new simulation by creating/clearing the data file with headers.
     Args:
@@ -37,7 +38,7 @@ def start_new_simulation_log(filename="simulation_data.txt") -> None:
         print(f"Could not create log file: {e}")
 
 
-def _read_simulation_data(filename="simulation_data.txt") -> tuple[list[int], list[int], list[int], list[int]]:
+def _read_simulation_data(filename="simulation_data.csv") -> tuple[list[int], list[int], list[int], list[int]]:
     """
     Read simulation data from file and return lists of data.
     Args:
@@ -68,7 +69,7 @@ def _read_simulation_data(filename="simulation_data.txt") -> tuple[list[int], li
     return time_steps, served, expired, queued
 
 
-def create_requests_plot(filename="simulation_data.txt", save_plot=False) -> None:
+def create_requests_plot(filename="simulation_data.csv", save_plot=False) -> None:
     """
     Create and display a plot of served, expired, and queued requests over time.
 
@@ -112,7 +113,7 @@ def create_requests_plot(filename="simulation_data.txt", save_plot=False) -> Non
     plt.show()
 
 
-def print_summary_stats(filename="simulation_data.txt") -> None:
+def print_summary_stats(filename="simulation_data.csv") -> None:
     """
     Print summary statistics from the simulation data.
     Args:
@@ -123,7 +124,6 @@ def print_summary_stats(filename="simulation_data.txt") -> None:
     if not time_steps:
         print("No data found")
         return
-
 
     final_served = served[-1] if served else 0
     final_expired = expired[-1] if expired else 0
@@ -143,7 +143,7 @@ def print_summary_stats(filename="simulation_data.txt") -> None:
 
 
 # Simple convenience function to generate everything after simulation
-def generate_report(filename="simulation_data.txt") -> None:
+def generate_report(filename="simulation_data.csv") -> None:
     """
     Generate complete report with stats and plot.
     Args:

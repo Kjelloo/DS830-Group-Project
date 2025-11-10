@@ -1,5 +1,5 @@
-from phase1 import requests
 from phase1 import metrics
+from phase1 import requests
 
 
 def init_state(drivers, requests, timeout, req_rate, width, height) -> dict:
