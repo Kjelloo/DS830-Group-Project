@@ -125,7 +125,7 @@ def load_requests(path: str) -> list[dict]:
             for i, line in enumerate(file, start=1):
                 values = line.strip().split(',')
 
-                # Create a dictionary mapping each header to its corresponding value, converted to int
+                # Create a dictionary, mapping each header to its corresponding value, converted to int
                 request_data = {headers[j].strip(): int(values[j]) for j in range(len(headers))}
 
                 # Validate that pickup and delivery coordinates are within grid bounds

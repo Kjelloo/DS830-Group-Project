@@ -1,13 +1,18 @@
 from phase1 import requests
+from phase1 import metrics
 
 
-def init_state(drivers, requests, timeout, req_rate, width, height):
+def init_state(drivers, requests, timeout, req_rate, width, height) -> dict:
     """Build the starting simulation state (t = 0) compatible with simulate_step."""
+    # Start a new simulation log file
+    metrics.start_new_simulation_log()
+
     ds = [{
         "id": int(d["id"]),
         "x": float(d["x"]),
         "y": float(d["y"]),
-        "speed": float(d.get("speed", 1.0)),
+        "vx": float(d["vx"]),
+        "vy": float(d["vy"]),
         "target_id": d.get("target_id", None),
     } for d in drivers]
 
@@ -49,18 +54,21 @@ def simulate_step(state: dict) -> tuple[dict, dict]:
     _move_drivers(state["drivers"], state["pending"], state)
     _update_waits(state["pending"])
     _handle_expirations(state)
-    # state["t"] += 1
 
     # handle metrics
-    metrics = {
+    metrics_dict = {
         "served": state["served"],
         "expired": state["expired"],
         "avg_wait": sum(state["served_waits"]) / state["served"] if len(state["served_waits"]) > 0 else 0
     }
+
+    # Record metrics for visualization
+    metrics.record_step_to_file(state, metrics_dict)
+
     # Remove expired and delivered requests from pending list
     state["pending"] = [r for r in state["pending"] if r["status"] not in ("expired", "delivered")]
 
-    return state, metrics
+    return state, metrics_dict
 
 
 def _assign_requests(drivers: list[dict], requests: list[dict]) -> None:
