@@ -1,5 +1,6 @@
 from phase1 import metrics
-from phase1 import requests
+from phase1 import io_mod
+from typing import Optional
 
 
 def init_state(drivers, requests, timeout, req_rate, width, height) -> dict:
@@ -7,15 +8,20 @@ def init_state(drivers, requests, timeout, req_rate, width, height) -> dict:
     # Start a new simulation log file
     metrics.start_new_simulation_log()
 
+    """
     ds = [{
         "id": int(d["id"]),
         "x": float(d["x"]),
         "y": float(d["y"]),
         "vx": float(d["vx"]),
         "vy": float(d["vy"]),
+        "tx": float(d["tx"]),
+        "ty": float(d["ty"]),
         "target_id": d.get("target_id", None),
     } for d in drivers]
+    """
 
+    """
     pending, future = [], []
     for r in requests:
         req = {
@@ -28,12 +34,12 @@ def init_state(drivers, requests, timeout, req_rate, width, height) -> dict:
             "t_wait": 0,
         }
         (pending if req["t"] <= 0 else future).append(req)
-
+    """
     return {
         "t": 0,
-        "drivers": ds,
-        "pending": pending,
-        "future": future,
+        "drivers": drivers,
+        "pending": requests,
+        "future": [],
         "served": 0,
         "expired": 0,
         "timeout": int(timeout),
@@ -49,7 +55,7 @@ def simulate_step(state: dict) -> tuple[dict, dict]:
     Simulates a step in the simulation.
     """
     state["t"] += 1
-    requests.generate_requests(state["t"], state["pending"], state["req_rate"])
+    io_mod.generate_requests(state["t"], state["pending"], state["req_rate"])
     _assign_requests(state["drivers"], state["pending"])
     _move_drivers(state["drivers"], state["pending"], state)
     _update_waits(state["pending"])
@@ -73,35 +79,76 @@ def simulate_step(state: dict) -> tuple[dict, dict]:
 
 def _assign_requests(drivers: list[dict], requests: list[dict]) -> None:
     """
-    Assigns requests to the closest available drivers based on proximity.
+    For each request iteratively assign the closest available driver.
     """
+
+    # Type checking of drivers and requests.
+    if not type(drivers) is list or not type(requests) is list:
+        raise TypeError("drivers and requests must be of type list.")
+    # Returning if no requests are present.
+    if len(requests) == 0:
+        return
+
+    # Making sure drivers and requests are lists of dicts. Check can be removed if needed.
+    for r in requests:
+        if not type(r) is dict:
+            raise TypeError("request must be of type dict.")
+    for d in drivers:
+        if not type(d) is dict:
+            raise TypeError("driver must be of type dict.")
+
+    # Iteratively assigns driver to request if requests exists and drivers are available.
     for request in requests:
         if request["status"] == "waiting":
             closest_driver = _calculate_closest_driver(request, drivers)
             if closest_driver is not None:
-                closest_driver["target_id"] = request["id"]
-                closest_driver["tx"] = request["px"]
-                closest_driver["ty"] = request["py"]
-                request["driver_id"] = closest_driver["id"]
-                request["status"] = "assigned"
+
+                closest_driver.update({
+                    "target_id": request["id"],
+                    "tx": request["px"],
+                    "ty": request["py"]
+                })
+                request.update({
+                    "driver_id": closest_driver["id"],
+                    "status": "assigned"
+                })
                 _compute_velocity_vector(closest_driver)
+
 
 
 def _compute_velocity_vector(driver: dict, velocity: int = 5) -> None:
     """
     Computes a velocity vector based on a drivers position and his target.
+
+    Example:
+        >>> driver = {"id":0,"x":14,"y":10,"vx":None,"vy":None,"tx":30,"ty":45,"target_id":None}
+        >>> driver
+        {'id': 0, 'x': 14, 'y': 10, 'vx': None, 'vy': None, 'tx': 30, 'ty': 45, 'target_id': None}
+        >>> _compute_velocity_vector(driver, velocity = 5)
+        >>> driver
+        {'id': 0, 'x': 14, 'y': 10, 'vx': 2.078798801338972, 'vy': 4.547372377929001, 'tx': 30, 'ty': 45, 'target_id': None}
     """
-    D = (driver["tx"] - driver["x"], driver["ty"] - driver["y"])  # compute direction vector
-    D_magnitude = (D[0] ** 2 + D[1] ** 2) ** 0.5  # compute magnitude of D
-    if D_magnitude == 0:
+
+    # Type and Value error handling
+    if not type(driver) is dict:
+        raise TypeError("driver must be of type dict.")
+    if not (isinstance(velocity, int) or (isinstance(velocity, float) and velocity % 1 == 0.0)):
+        raise TypeError("velocity must be an integer.")
+    if 0 > velocity:
+        raise ValueError("velocity must be larger than or equal to 0.")
+    velocity = int(velocity)
+
+    d_vector = (driver["tx"] - driver["x"], driver["ty"] - driver["y"])  # compute direction vector
+    d_magnitude = (d_vector[0] ** 2 + d_vector[1] ** 2) ** 0.5  # compute magnitude of D
+    if d_magnitude == 0:
         driver["vx"], driver["vy"] = 0, 0
         return
-    D_normalized = (D[0] / D_magnitude, D[1] / D_magnitude)  # normalize D
-    D_velocity = (D_normalized[0] * velocity, D_normalized[1] * velocity)  # Multiply with velocity
-    driver["vx"], driver["vy"] = D_velocity  # update vx and vx in driver dict
+    d_normalized = (d_vector[0] / d_magnitude, d_vector[1] / d_magnitude)  # normalize D
+    d_velocity = (d_normalized[0] * velocity, d_normalized[1] * velocity)  # Multiply with velocity
+    driver["vx"], driver["vy"] = d_velocity  # update vx and vx in driver dict
 
 
-def _calculate_closest_driver(req: dict, drivers: list[dict]) -> dict | None:
+def _calculate_closest_driver(req: dict, drivers: list[dict]) -> Optional[dict]:
     """
     Calculate the closest available driver to the request.
 
@@ -115,15 +162,15 @@ def _calculate_closest_driver(req: dict, drivers: list[dict]) -> dict | None:
     closest_driver = None
     min_distance = float('inf')
 
-    for driver in drivers:
-        if driver['target_id'] is None:
-            distance = ((req['px'] - driver['x']) ** 2 + (req['py'] - driver['y']) ** 2) ** 0.5
-            if distance < min_distance:
-                min_distance = distance
-                closest_driver = driver
+    for driver in (d for d in drivers if d["target_id"] is None):
+        x_dist = driver["x"] - req["px"]
+        y_dist = driver["y"] - req["py"]
+        driver_dist = (x_dist ** 2 + y_dist ** 2) ** 0.5
+        if driver_dist < min_distance:
+            min_distance = driver_dist
+            closest_driver = driver
 
-    return closest_driver
-
+    return closest_driver # Har testet denne funktion og den virker som den skal.
 
 def _within_one_step(driver: dict) -> bool:
     """
@@ -131,6 +178,13 @@ def _within_one_step(driver: dict) -> bool:
     the distance he can travel within one step. Used as a helper function
     for handle_transactions - transactions happens if this function returns True.
     """
+
+    # Input handling
+    if not type(driver) is dict:
+        raise TypeError("driver must be of type dict.")
+    if driver["tx"] is None or driver["ty"] is None or driver["vx"] is None or driver["vy"] is None:
+        return False
+
     one_step_distance = (driver["vx"] ** 2 + driver["vy"] ** 2) ** 0.5
     actual_distance = ((driver["tx"] - driver["x"]) ** 2 + (driver["ty"] - driver["y"]) ** 2) ** 0.5
     return actual_distance < one_step_distance
@@ -141,6 +195,15 @@ def _handle_driver_transaction(driver: dict, requests: list[dict], state: dict) 
     Handles pick-up or drop-off for a single driver if within one step of target.
     Returns True if a transaction occurred (to prevent movement in same step).
     """
+
+    # Handle type errors
+    if not type(driver) is dict:
+        raise TypeError("driver must be of type dict.")
+    if not type(requests) is list:
+        raise TypeError("requests must be of type list.")
+    if not type(state) is dict:
+        raise TypeError("state must be of type dict.")
+
     if driver["target_id"] is None:
         return False
 
@@ -185,6 +248,23 @@ def _move_drivers(drivers: list[dict], requests: list[dict], state: dict) -> Non
     Handles transactions and moves drivers towards their targets.
     Transactions and movement are separated into different steps.
     """
+
+    # Handle type errors for drivers
+    if not type(drivers) is list:
+        raise TypeError("drivers must be a list.")
+    for driver in drivers:
+        if not type(driver) is dict:
+            raise TypeError("driver must be a dictionary.")
+    # Handle type errors for requests
+    if not type(requests) is list:
+        raise TypeError("requests must be a list.")
+    for request in requests:
+        if not type(request) is dict:
+            raise TypeError("request must be a dictionary.")
+    # handle type error for state
+    if not type(state) is dict:
+        raise TypeError("state must be a dictionary.")
+
     for driver in drivers:
         if driver["target_id"] is not None:
             # First check if a transaction should occur
@@ -208,6 +288,11 @@ def _handle_expirations(state: dict) -> None:
     Checks if requests exceed max waiting time (timeout). If that is the case, requests are dropped
     and drivers are freed up.
     """
+
+    # TypeError handling.
+    if not type(state) is dict:
+        raise TypeError("state must be a dictionary.")
+
     requests = state["pending"]
     drivers = state["drivers"]
     for request in requests:
@@ -230,8 +315,16 @@ def _handle_expirations(state: dict) -> None:
 
 def _update_waits(requests: list[dict]):
     """
-    Updates the waiting times of drivers iteratively.
+    Updates the waiting times of requests iteratively.
     """
+
+    # Handling of type error
+    if not type(requests) is list:
+        raise TypeError("requests must be a list.")
+    if len(requests) == 0:
+        return
+
+    # Iteratively update request waits
     for request in requests:
         if request["status"] not in ("expired", "delivered"):
             request["t_wait"] += 1
