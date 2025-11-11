@@ -114,7 +114,7 @@ def init_state(drivers: list[dict], requests: list[dict], timeout: int, req_rate
     if not isinstance(timeout, int) or timeout <= 0:
         raise ValueError("Timeout must be a positive integer.")
 
-    if not isinstance(req_rate, (int, float)) or req_rate < 0:
+    if not isinstance(req_rate, (int, float)) or req_rate <= 0:
         raise ValueError("Request rate must be a non-negative number.")
 
     if not isinstance(width, int) or width <= 0:
@@ -167,8 +167,50 @@ def init_state(drivers: list[dict], requests: list[dict], timeout: int, req_rate
 
 def simulate_step(state: dict) -> tuple[dict, dict]:
     """
-    Simulates a step in the simulation.
+    Simulates a step in the simulation. Updates the state and computes metrics.
+
+    It performs the following operations in order:
+
+    1. Increments the simulation time.
+    2. Generates new requests based on the request rate.
+    3. Assigns requests to available drivers.
+    4. Moves drivers towards their targets.
+    5. Updates waiting times for pending requests.
+    6. Handles request expirations.
+
+    Args:
+        state (dict): The current state of the simulation.
+    Returns:
+        tuple[dict, dict]: Updated state and metrics dictionary.
+
+    Test with a simple scenario of one driver and one request:
+    >>> drivers = [{"id": 1, "x": 1, "y": 1, "vx": 0, "vy": 0, "tx": 0, "ty": 0}]
+    >>> requests_list = [{"id": 10, "t": 0, "px": 5, "py": 5, "dx": 10, "dy": 10, "driver_id": None, "status": "waiting", "t_wait": 0}]
+    >>> state = init_state(drivers, requests_list, 30, 0.5, 100, 100)
+    >>> new_state, metrics_dict = simulate_step(state)
+    >>> new_state["t"]
+    1
+
+    >>> isinstance(new_state, dict)
+    True
+
+    >>> isinstance(metrics_dict, dict)
+    True
+
+    >>> _is_state_dict(new_state)
+    True
+
+    >>> simulate_step({})
+    Traceback (most recent call last):
+        ...
+    ValueError: State dictionary is missing required keys.
     """
+    if not isinstance(state, dict):
+        raise ValueError("State must be provided as a dictionary.")
+
+    if not _is_state_dict(state):
+        raise ValueError("State dictionary is missing required keys.")
+
     state["t"] += 1
     requests.generate_requests(state["t"], state["pending"], state["req_rate"])
     _assign_requests(state["drivers"], state["pending"])
