@@ -8,33 +8,6 @@ def init_state(drivers, requests, timeout, req_rate, width, height) -> dict:
     # Start a new simulation log file
     metrics.start_new_simulation_log()
 
-    """
-    ds = [{
-        "id": int(d["id"]),
-        "x": float(d["x"]),
-        "y": float(d["y"]),
-        "vx": float(d["vx"]),
-        "vy": float(d["vy"]),
-        "tx": float(d["tx"]),
-        "ty": float(d["ty"]),
-        "target_id": d.get("target_id", None),
-    } for d in drivers]
-    """
-
-    """
-    pending, future = [], []
-    for r in requests:
-        req = {
-            "id": int(r["id"]),
-            "t": int(r["t"]),
-            "px": int(r["px"]), "py": int(r["py"]),
-            "dx": int(r["dx"]), "dy": int(r["dy"]),
-            "driver_id": None,
-            "status": "waiting",
-            "t_wait": 0,
-        }
-        (pending if req["t"] <= 0 else future).append(req)
-    """
     return {
         "t": 0,
         "drivers": drivers,
@@ -48,7 +21,6 @@ def init_state(drivers, requests, timeout, req_rate, width, height) -> dict:
         "width": int(width),
         "height": int(height),
     }
-
 
 def simulate_step(state: dict) -> tuple[dict, dict]:
     """
@@ -81,6 +53,10 @@ def _assign_requests(drivers: list[dict], requests: list[dict]) -> None:
     """
     For each request iteratively assign the closest available driver.
     """
+
+    # Har testet funktionen og den virker som den skal - requests bliver iterativt assigned til
+    # den driver, der er tættest på.
+
 
     # Type checking of drivers and requests.
     if not type(drivers) is list or not type(requests) is list:

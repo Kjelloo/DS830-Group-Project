@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="86c699ab-444a-4809-9b1f-f8410d28550a" name="Changes" comment="" />
+    <list default="true" id="86c699ab-444a-4809-9b1f-f8410d28550a" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/sim_mod.py" beforeDir="false" afterPath="$PROJECT_DIR$/sim_mod.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -27,6 +29,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "magnus__11nov",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -52,6 +55,7 @@
       <updated>1762343583521</updated>
       <workItem from="1762343584899" duration="1402000" />
       <workItem from="1762776353574" duration="24355000" />
+      <workItem from="1762892255072" duration="149000" />
     </task>
     <servers />
   </component>
