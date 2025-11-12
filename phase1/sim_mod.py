@@ -135,6 +135,16 @@ def _calculate_closest_driver(req: dict, drivers: list[dict]) -> Optional[dict]:
     Returns:
         dict | None: The closest available driver dictionary or None if no drivers are available.
     """
+
+    # Checking if input are correct types
+    if not type(req) is dict:
+        raise TypeError("req must be of type dict.")
+    if not type(drivers) is list:
+        raise TypeError("drivers must be of type list.")
+    for d in drivers: # Ved ikke om det bliver for meget at iterere gennem alle drivers hver gang... slet hvis det er dumt.
+        if type(d) is not dict:
+            raise TypeError("driver must be of type dict.")
+
     closest_driver = None
     min_distance = float('inf')
 
