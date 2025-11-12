@@ -31,6 +31,62 @@ def load_requests(path: str) -> list[dict]:
             - The grid boundaries are fixed at max_x = 50 and max_y = 30.
             - Requests with out-of-bounds coordinates are skipped.
             - The unique `id` field is assigned incrementally starting from 1.
+
+                    Examples
+        --------
+        Simple good row:
+        >>> import tempfile, os
+        >>> txt = "#request time,pickup x,pickup y,delivery x,delivery y\\n7,5,5,5,5\\n"
+        >>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+        >>> _ = f.write(txt.encode()); f.close()
+        >>> out = load_requests(f.name)
+        >>> len(out)
+        1
+        >>> out[0]["t"], out[0]["px"], out[0]["py"], out[0]["dx"], out[0]["dy"]
+        (7, 5, 5, 5, 5)
+        >>> os.unlink(f.name)
+
+        Non-integer value -> ValueError:
+        >>> bad = "#request time,pickup x,pickup y,delivery x,delivery y\\nhello,1,2,3,4\\n"
+        >>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+        >>> _ = f.write(bad.encode()); f.close()
+        >>> try:
+        ...     _ = load_requests(f.name)
+        ... except ValueError:
+        ...     print("ValueError")
+        ValueError
+        >>> os.unlink(f.name)
+
+        Drop bad rows (t<0 or out of bounds). Keep only the valid one:
+        >>> txt = (
+        ...     "#request time,pickup x,pickup y,delivery x,delivery y\\n"
+        ...     "-1,0,0,0,0\\n"    # drop: t < 0
+        ...     "0,60,0,0,0\\n"    # drop: px > 50
+        ...     "0,0,0,0,31\\n"    # drop: dy > 30
+        ...     "0,1,2,3,4\\n"     # keep
+        ... )
+        >>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+        >>> _ = f.write(txt.encode()); f.close()
+        >>> out = load_requests(f.name)
+        >>> len(out)
+        1
+        >>> out[0]["t"], out[0]["px"], out[0]["py"], out[0]["dx"], out[0]["dy"]
+        (0, 1, 2, 3, 4)
+        >>> os.unlink(f.name)
+
+                Wrong or missing headers → Exception:
+        >>> import tempfile, os
+        >>> bad = "a,b\\n1,2\\n"
+        >>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+        >>> _ = f.write(bad.encode()); f.close()
+        >>> try:
+        ...     _ = load_requests(f.name)
+        ... except Exception:
+        ...     print("Exception")
+        Exception
+        >>> os.unlink(f.name)
+
+
     """
     # Define grid boundaries for valid coordinates
     max_x, max_y = 50, 30
