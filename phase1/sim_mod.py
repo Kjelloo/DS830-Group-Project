@@ -1,13 +1,164 @@
+<<<<<<< HEAD:phase1/sim_mod.py
 from phase1 import metrics
 from phase1 import io_mod
 from typing import Optional
+=======
+if __name__ == "__main__":
+    # To allow for direct testing of this module
+    import metrics, requests
+else:
+    from phase1 import metrics
+    from phase1 import requests
+>>>>>>> kjell/doctest:phase1/simulation.py
 
+def _is_driver_dict(d: dict) -> bool:
+    """
+    Check if a dictionary has all required keys for a driver.
 
-def init_state(drivers, requests, timeout, req_rate, width, height) -> dict:
-    """Build the starting simulation state (t = 0) compatible with simulate_step."""
+    Return:
+        bool: True if all required keys are present, False otherwise.
+
+    """
+    required_keys = {"id", "x", "y", "vx", "vy", "tx", "ty"}
+    return required_keys.issubset(d.keys())
+
+def _is_request_dict(r: dict) -> bool:
+    """
+    Check if a dictionary has all required keys for a request.
+
+    Returns:
+        bool: True if all required keys are present, False otherwise.
+    """
+    required_keys = {"id", "t", "px", "py", "dx", "dy", "driver_id", "status", "t_wait"}
+    return required_keys.issubset(r.keys())
+
+def _is_state_dict(s: dict) -> bool:
+    """
+    Check if a dictionary has all required keys for the simulation state.
+
+    Returns:
+        bool: True if all required keys are present, False otherwise.
+    """
+    required_keys = {"t", "drivers", "pending", "future", "served", "expired", "timeout", "served_waits", "req_rate", "width", "height"}
+    return required_keys.issubset(s.keys())
+
+def init_state(drivers: list[dict], requests: list[dict], timeout: int, req_rate: float, width: int = 50, height: int = 30) -> dict:
+    """
+    Build the initial simulation state (t = 0), put requests into pending or future based on t.
+
+    Args:
+        drivers (list[dict]): List of driver dictionaries.
+        requests (list[dict]): List of request dictionaries.
+        timeout (int): Maximum waiting time for requests.
+        req_rate (float): Request generation rate.
+        width (int): Width of the simulation grid.
+        height (int): Height of the simulation grid.
+
+    Returns:
+        dict: The initial state of the simulation.
+
+    Test valid initialization with one driver and one immediate request (t = 0):
+    >>> drivers = [{"id": 1, "x": 0, "y": 0, "vx": 0, "vy": 0, "tx": 0, "ty": 0}]
+    >>> requests = [{"id": 10, "t": 0, "px": 5, "py": 5, "dx": 10, "dy": 10, "driver_id": None, "status": "waiting", "t_wait": 0}]
+    >>> state = init_state(drivers, requests, 30, 0.5, 100, 100)
+
+    >>> len(state["drivers"])
+    1
+    >>> len(state["pending"])
+    1
+    >>> len(state["future"])
+    0
+
+    Test with future requests (t > 0):
+    >>> requests_future = [{"id": 20, "t": 5, "px": 2, "py": 3, "dx": 8, "dy": 9, "driver_id": None, "status": "waiting", "t_wait": 0}]
+    >>> state2 = init_state([], requests_future, 20, 1.0, 50, 50)
+    >>> len(state2["pending"])
+    0
+    >>> len(state2["future"])
+    1
+    >>> state2["future"][0]["t"]
+    5
+
+    Test with invalid driver dictionary (missing keys):
+    >>> init_state([{"id": 1, "x": 0, "y": 0}], requests, 30, 0.5, 100, 100)
+    Traceback (most recent call last):
+        ...
+    ValueError: All driver dictionaries must contain the required keys: 'id', 'x', 'y', 'vx', 'vy', 'tx', 'ty'.
+
+    Test with invalid request dictionary (missing keys):
+    >>> init_state(drivers, [{"id": 10, "t": 0, "px": 5, "py": 5}], 30, 0.5, 100, 100)
+    Traceback (most recent call last):
+        ...
+    ValueError: All request dictionaries must contain the required keys: 'id', 't', 'px', 'py', 'dx', 'dy', 'driver_id', 'status', 't_wait'.
+
+    Test output state structure:
+    >>> state3 = init_state(drivers, requests, 30, 0.5, 100, 100)
+    >>> isinstance(state3, dict)
+    True
+    >>> _is_state_dict(state3)
+    True
+    """
+
+    if not isinstance(drivers, list):
+        raise ValueError("Drivers must be provided as lists of dictionaries.")
+
+    if not isinstance(requests, list):
+        raise ValueError("Requests must be provided as a list of dictionaries.")
+
+    if not all(isinstance(d, dict) for d in drivers):
+        raise ValueError("All drivers must be dictionaries.")
+
+    if not all(_is_driver_dict(d) for d in drivers):
+        raise ValueError("All driver dictionaries must contain the required keys: 'id', 'x', 'y', 'vx', 'vy', 'tx', 'ty'.")
+
+    if not all(_is_request_dict(r) for r in requests):
+        raise ValueError("All request dictionaries must contain the required keys: 'id', 't', 'px', 'py', 'dx', 'dy', 'driver_id', 'status', 't_wait'.")
+
+    if not all(isinstance(r, dict) for r in requests):
+        raise ValueError("All requests must be dictionaries.")
+
+    if not isinstance(timeout, int) or timeout <= 0:
+        raise ValueError("Timeout must be a positive integer.")
+
+    if not isinstance(req_rate, (int, float)) or req_rate <= 0:
+        raise ValueError("Request rate must be a non-negative number.")
+
+    if not isinstance(width, int) or width <= 0:
+        raise ValueError("Width must be a positive integer.")
+
+    if not isinstance(height, int) or height <= 0:
+        raise ValueError("Height must be a positive integer.")
+
     # Start a new simulation log file
     metrics.start_new_simulation_log()
 
+<<<<<<< HEAD:phase1/sim_mod.py
+=======
+    ds = [{
+        "id": int(d["id"]),
+        "x": float(d["x"]),
+        "y": float(d["y"]),
+        "vx": float(d["vx"]),
+        "vy": float(d["vy"]),
+        "target_id": d.get("target_id", None),
+    } for d in drivers]
+
+    pending, future = [], []
+    for r in requests:
+        req = {
+            "id": int(r["id"]),
+            "t": int(r["t"]),
+            "px": float(r["px"]),
+            "py": float(r["py"]),
+            "dx": float(r["dx"]),
+            "dy": float(r["dy"]),
+            "driver_id": None,
+            "status": "waiting",
+            "t_wait": 0,
+        }
+        (pending if req["t"] <= 0 else future).append(req)
+
+>>>>>>> kjell/doctest:phase1/simulation.py
     return {
         "t": 0,
         "drivers": drivers,
@@ -24,8 +175,50 @@ def init_state(drivers, requests, timeout, req_rate, width, height) -> dict:
 
 def simulate_step(state: dict) -> tuple[dict, dict]:
     """
-    Simulates a step in the simulation.
+    Simulates a step in the simulation. Updates the state and computes metrics.
+
+    It performs the following operations in order:
+
+    1. Increments the simulation time.
+    2. Generates new requests based on the request rate.
+    3. Assigns requests to available drivers.
+    4. Moves drivers towards their targets.
+    5. Updates waiting times for pending requests.
+    6. Handles request expirations.
+
+    Args:
+        state (dict): The current state of the simulation.
+    Returns:
+        tuple[dict, dict]: Updated state and metrics dictionary.
+
+    Test with a simple scenario of one driver and one request:
+    >>> drivers = [{"id": 1, "x": 1, "y": 1, "vx": 0, "vy": 0, "tx": 0, "ty": 0}]
+    >>> requests_list = [{"id": 10, "t": 0, "px": 5, "py": 5, "dx": 10, "dy": 10, "driver_id": None, "status": "waiting", "t_wait": 0}]
+    >>> state = init_state(drivers, requests_list, 30, 0.5, 100, 100)
+    >>> new_state, metrics_dict = simulate_step(state)
+    >>> new_state["t"]
+    1
+
+    >>> isinstance(new_state, dict)
+    True
+
+    >>> isinstance(metrics_dict, dict)
+    True
+
+    >>> _is_state_dict(new_state)
+    True
+
+    >>> simulate_step({})
+    Traceback (most recent call last):
+        ...
+    ValueError: State dictionary is missing required keys.
     """
+    if not isinstance(state, dict):
+        raise ValueError("State must be provided as a dictionary.")
+
+    if not _is_state_dict(state):
+        raise ValueError("State dictionary is missing required keys.")
+
     state["t"] += 1
     io_mod.generate_requests(state["t"], state["pending"], state["req_rate"])
     _assign_requests(state["drivers"], state["pending"])
@@ -314,3 +507,7 @@ def _update_waits(requests: list[dict]):
     for request in requests:
         if request["status"] not in ("expired", "delivered"):
             request["t_wait"] += 1
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
