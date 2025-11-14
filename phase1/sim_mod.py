@@ -1,15 +1,10 @@
-<<<<<<< HEAD:phase1/sim_mod.py
-from phase1 import metrics
-from phase1 import io_mod
-from typing import Optional
-=======
 if __name__ == "__main__":
     # To allow for direct testing of this module
-    import metrics, requests
+    import metrics, io_mod
 else:
     from phase1 import metrics
-    from phase1 import requests
->>>>>>> kjell/doctest:phase1/simulation.py
+    from phase1 import io_mod
+from typing import Optional
 
 def _is_driver_dict(d: dict) -> bool:
     """
@@ -22,6 +17,7 @@ def _is_driver_dict(d: dict) -> bool:
     required_keys = {"id", "x", "y", "vx", "vy", "tx", "ty"}
     return required_keys.issubset(d.keys())
 
+
 def _is_request_dict(r: dict) -> bool:
     """
     Check if a dictionary has all required keys for a request.
@@ -32,6 +28,7 @@ def _is_request_dict(r: dict) -> bool:
     required_keys = {"id", "t", "px", "py", "dx", "dy", "driver_id", "status", "t_wait"}
     return required_keys.issubset(r.keys())
 
+
 def _is_state_dict(s: dict) -> bool:
     """
     Check if a dictionary has all required keys for the simulation state.
@@ -41,6 +38,7 @@ def _is_state_dict(s: dict) -> bool:
     """
     required_keys = {"t", "drivers", "pending", "future", "served", "expired", "timeout", "served_waits", "req_rate", "width", "height"}
     return required_keys.issubset(s.keys())
+
 
 def init_state(drivers: list[dict], requests: list[dict], timeout: int, req_rate: float, width: int = 50, height: int = 30) -> dict:
     """
@@ -132,33 +130,6 @@ def init_state(drivers: list[dict], requests: list[dict], timeout: int, req_rate
     # Start a new simulation log file
     metrics.start_new_simulation_log()
 
-<<<<<<< HEAD:phase1/sim_mod.py
-=======
-    ds = [{
-        "id": int(d["id"]),
-        "x": float(d["x"]),
-        "y": float(d["y"]),
-        "vx": float(d["vx"]),
-        "vy": float(d["vy"]),
-        "target_id": d.get("target_id", None),
-    } for d in drivers]
-
-    pending, future = [], []
-    for r in requests:
-        req = {
-            "id": int(r["id"]),
-            "t": int(r["t"]),
-            "px": float(r["px"]),
-            "py": float(r["py"]),
-            "dx": float(r["dx"]),
-            "dy": float(r["dy"]),
-            "driver_id": None,
-            "status": "waiting",
-            "t_wait": 0,
-        }
-        (pending if req["t"] <= 0 else future).append(req)
-
->>>>>>> kjell/doctest:phase1/simulation.py
     return {
         "t": 0,
         "drivers": drivers,
@@ -172,6 +143,7 @@ def init_state(drivers: list[dict], requests: list[dict], timeout: int, req_rate
         "width": int(width),
         "height": int(height),
     }
+
 
 def simulate_step(state: dict) -> tuple[dict, dict]:
     """
@@ -247,10 +219,6 @@ def _assign_requests(drivers: list[dict], requests: list[dict]) -> None:
     For each request iteratively assign the closest available driver.
     """
 
-    # Har testet funktionen og den virker som den skal - requests bliver iterativt assigned til
-    # den driver, der er tættest på.
-
-
     # Type checking of drivers and requests.
     if not type(drivers) is list or not type(requests) is list:
         raise TypeError("drivers and requests must be of type list.")
@@ -260,11 +228,12 @@ def _assign_requests(drivers: list[dict], requests: list[dict]) -> None:
 
     # Making sure drivers and requests are lists of dicts. Check can be removed if needed.
     for r in requests:
-        if not type(r) is dict:
-            raise TypeError("request must be of type dict.")
+        if not _is_request_dict(r):
+            raise ValueError("Request dictionary is missing required keys.")
     for d in drivers:
-        if not type(d) is dict:
-            raise TypeError("driver must be of type dict.")
+        if not _is_driver_dict(d):
+            raise ValueError("Driver dictionary is missing required keys.")
+
 
     # Iteratively assigns driver to request if requests exists and drivers are available.
     for request in requests:
@@ -282,7 +251,6 @@ def _assign_requests(drivers: list[dict], requests: list[dict]) -> None:
                     "status": "assigned"
                 })
                 _compute_velocity_vector(closest_driver)
-
 
 
 def _compute_velocity_vector(driver: dict, velocity: int = 5) -> None:
@@ -330,13 +298,15 @@ def _calculate_closest_driver(req: dict, drivers: list[dict]) -> Optional[dict]:
     """
 
     # Checking if input are correct types
-    if not type(req) is dict:
-        raise TypeError("req must be of type dict.")
+    if not _is_request_dict(req):
+        raise TypeError("Request dictionary is missing required keys.")
+
     if not type(drivers) is list:
         raise TypeError("drivers must be of type list.")
-    for d in drivers: # Ved ikke om det bliver for meget at iterere gennem alle drivers hver gang... slet hvis det er dumt.
-        if type(d) is not dict:
-            raise TypeError("driver must be of type dict.")
+
+    for d in drivers:
+        if not _is_driver_dict(d):
+            raise ValueError("Driver dictionary is missing required keys.")
 
     closest_driver = None
     min_distance = float('inf')
@@ -350,6 +320,7 @@ def _calculate_closest_driver(req: dict, drivers: list[dict]) -> Optional[dict]:
             closest_driver = driver
 
     return closest_driver # Har testet denne funktion og den virker som den skal.
+
 
 def _within_one_step(driver: dict) -> bool:
     """
@@ -428,21 +399,22 @@ def _move_drivers(drivers: list[dict], requests: list[dict], state: dict) -> Non
     Transactions and movement are separated into different steps.
     """
 
-    # Handle type errors for drivers
+    # Handle type error for drivers
     if not type(drivers) is list:
         raise TypeError("drivers must be a list.")
-    for driver in drivers:
-        if not type(driver) is dict:
-            raise TypeError("driver must be a dictionary.")
-    # Handle type errors for requests
+    # Handle type error for requests
     if not type(requests) is list:
         raise TypeError("requests must be a list.")
-    for request in requests:
-        if not type(request) is dict:
-            raise TypeError("request must be a dictionary.")
     # handle type error for state
     if not type(state) is dict:
         raise TypeError("state must be a dictionary.")
+
+    for driver in drivers:
+        if not _is_driver_dict(driver):
+            raise ValueError("Driver dict is missing required keys.")
+    for request in requests:
+        if not _is_request_dict(request):
+            raise ValueError("Request dict is missing required keys.")
 
     for driver in drivers:
         if driver["target_id"] is not None:
@@ -507,6 +479,7 @@ def _update_waits(requests: list[dict]):
     for request in requests:
         if request["status"] not in ("expired", "delivered"):
             request["t_wait"] += 1
+
 
 if __name__ == "__main__":
     import doctest
