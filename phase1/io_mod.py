@@ -204,7 +204,6 @@ def generate_drivers(n: int, width: int = 50, height: int = 30) -> list[dict]:
     return drivers
 
 
-
 def load_requests(path: str) -> list[dict]:
     """
         Load and validate delivery requests from a CSV file, converting them
