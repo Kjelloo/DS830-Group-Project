@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="86c699ab-444a-4809-9b1f-f8410d28550a" name="Changes" comment="Comments added and redundant code removed" />
+    <list default="true" id="86c699ab-444a-4809-9b1f-f8410d28550a" name="Changes" comment="Comments added and redundant code removed">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/drivers.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/io_mod.py" beforeDir="false" afterPath="$PROJECT_DIR$/io_mod.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requests.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sim_mod.py" beforeDir="false" afterPath="$PROJECT_DIR$/sim_mod.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -12,6 +18,9 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5
@@ -28,7 +37,7 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "magnus__11nov",
+    "git-widget-placeholder": "magnus/merge__conflicts",
     "ignore.virus.scanning.warn.message": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -117,6 +126,17 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Comments added and redundant code removed" />
     <option name="LAST_COMMIT_MESSAGE" value="Comments added and redundant code removed" />
@@ -128,6 +148,10 @@
           <url>file://$PROJECT_DIR$/../dispatch_ui.py</url>
           <line>57</line>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/tests/testing_closest_driver.py</url>
+          <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
