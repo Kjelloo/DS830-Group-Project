@@ -106,8 +106,6 @@ if __name__ == "__main__":
     # This will run after the GUI closes and generate the visualization
     try:
         from phase1 import metrics
-
-        print("\nGenerating simulation metrics and visualizations...")
         metrics.generate_report()
     except Exception as e:
         print(f"Error generating metrics: {e}")

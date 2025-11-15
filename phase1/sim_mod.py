@@ -14,7 +14,7 @@ def _is_driver_dict(d: dict) -> bool:
         bool: True if all required keys are present, False otherwise.
 
     """
-    required_keys = {"id", "x", "y", "vx", "vy", "tx", "ty"}
+    required_keys = {"id", "x", "y", "vx", "vy", "tx", "ty", "target_id"}
     return required_keys.issubset(d.keys())
 
 
@@ -36,7 +36,7 @@ def _is_state_dict(s: dict) -> bool:
     Returns:
         bool: True if all required keys are present, False otherwise.
     """
-    required_keys = {"t", "drivers", "pending", "future", "served", "expired", "timeout", "served_waits", "req_rate", "width", "height"}
+    required_keys = {"t", "drivers", "pending", "served", "expired", "timeout", "served_waits", "req_rate", "width", "height"}
     return required_keys.issubset(s.keys())
 
 
@@ -56,44 +56,32 @@ def init_state(drivers: list[dict], requests: list[dict], timeout: int, req_rate
         dict: The initial state of the simulation.
 
     Test valid initialization with one driver and one immediate request (t = 0):
-    >>> drivers = [{"id": 1, "x": 0, "y": 0, "vx": 0, "vy": 0, "tx": 0, "ty": 0}]
-    >>> requests = [{"id": 10, "t": 0, "px": 5, "py": 5, "dx": 10, "dy": 10, "driver_id": None, "status": "waiting", "t_wait": 0}]
-    >>> state = init_state(drivers, requests, 30, 0.5, 100, 100)
+    >>> drivers_test = [{"id": 1, "x": 0, "y": 0, "vx": 0, "vy": 0, "tx": 0, "ty": 0, "target_id": None}]
+    >>> requests_test = [{"id": 10, "t": 0, "px": 5, "py": 5, "dx": 10, "dy": 10, "driver_id": None, "status": "waiting", "t_wait": 0}]
+    >>> state = init_state(drivers_test, requests_test, 30, 0.5, 100, 100)
 
     >>> len(state["drivers"])
     1
     >>> len(state["pending"])
     1
-    >>> len(state["future"])
-    0
-
-    Test with future requests (t > 0):
-    >>> requests_future = [{"id": 20, "t": 5, "px": 2, "py": 3, "dx": 8, "dy": 9, "driver_id": None, "status": "waiting", "t_wait": 0}]
-    >>> state2 = init_state([], requests_future, 20, 1.0, 50, 50)
-    >>> len(state2["pending"])
-    0
-    >>> len(state2["future"])
-    1
-    >>> state2["future"][0]["t"]
-    5
 
     Test with invalid driver dictionary (missing keys):
-    >>> init_state([{"id": 1, "x": 0, "y": 0}], requests, 30, 0.5, 100, 100)
+    >>> init_state([{"id": 1, "x": 0, "y": 0}], requests_test, 30, 0.5, 100, 100)
     Traceback (most recent call last):
         ...
-    ValueError: All driver dictionaries must contain the required keys: 'id', 'x', 'y', 'vx', 'vy', 'tx', 'ty'.
+    ValueError: All driver dictionaries must contain the required keys: 'id', 'x', 'y', 'vx', 'vy', 'tx', 'ty', 'target_id'.
 
     Test with invalid request dictionary (missing keys):
-    >>> init_state(drivers, [{"id": 10, "t": 0, "px": 5, "py": 5}], 30, 0.5, 100, 100)
+    >>> init_state(drivers_test, [{"id": 10, "t": 0, "px": 5, "py": 5}], 30, 0.5, 100, 100)
     Traceback (most recent call last):
         ...
     ValueError: All request dictionaries must contain the required keys: 'id', 't', 'px', 'py', 'dx', 'dy', 'driver_id', 'status', 't_wait'.
 
     Test output state structure:
-    >>> state3 = init_state(drivers, requests, 30, 0.5, 100, 100)
-    >>> isinstance(state3, dict)
+    >>> state_test = init_state(drivers_test, requests_test, 30, 0.5, 100, 100)
+    >>> isinstance(state_test, dict)
     True
-    >>> _is_state_dict(state3)
+    >>> _is_state_dict(state_test)
     True
     """
 
@@ -107,7 +95,7 @@ def init_state(drivers: list[dict], requests: list[dict], timeout: int, req_rate
         raise ValueError("All drivers must be dictionaries.")
 
     if not all(_is_driver_dict(d) for d in drivers):
-        raise ValueError("All driver dictionaries must contain the required keys: 'id', 'x', 'y', 'vx', 'vy', 'tx', 'ty'.")
+        raise ValueError("All driver dictionaries must contain the required keys: 'id', 'x', 'y', 'vx', 'vy', 'tx', 'ty', 'target_id'.")
 
     if not all(_is_request_dict(r) for r in requests):
         raise ValueError("All request dictionaries must contain the required keys: 'id', 't', 'px', 'py', 'dx', 'dy', 'driver_id', 'status', 't_wait'.")
@@ -134,7 +122,6 @@ def init_state(drivers: list[dict], requests: list[dict], timeout: int, req_rate
         "t": 0,
         "drivers": drivers,
         "pending": requests,
-        "future": [],
         "served": 0,
         "expired": 0,
         "timeout": int(timeout),
@@ -164,20 +151,20 @@ def simulate_step(state: dict) -> tuple[dict, dict]:
         tuple[dict, dict]: Updated state and metrics dictionary.
 
     Test with a simple scenario of one driver and one request:
-    >>> drivers = [{"id": 1, "x": 1, "y": 1, "vx": 0, "vy": 0, "tx": 0, "ty": 0}]
+    >>> drivers = [{"id": 1, "x": 1, "y": 1, "vx": 0, "vy": 0, "tx": 0, "ty": 0, "target_id": None}]
     >>> requests_list = [{"id": 10, "t": 0, "px": 5, "py": 5, "dx": 10, "dy": 10, "driver_id": None, "status": "waiting", "t_wait": 0}]
-    >>> state = init_state(drivers, requests_list, 30, 0.5, 100, 100)
-    >>> new_state, metrics_dict = simulate_step(state)
-    >>> new_state["t"]
+    >>> state_test = init_state(drivers, requests_list, 30, 0.5, 100, 100)
+    >>> new_state_test, metrics_dict_test = simulate_step(state_test)
+    >>> new_state_test["t"]
     1
 
-    >>> isinstance(new_state, dict)
+    >>> isinstance(new_state_test, dict)
     True
 
-    >>> isinstance(metrics_dict, dict)
+    >>> isinstance(metrics_dict_test, dict)
     True
 
-    >>> _is_state_dict(new_state)
+    >>> _is_state_dict(new_state_test)
     True
 
     >>> simulate_step({})

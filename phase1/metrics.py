@@ -45,7 +45,7 @@ def start_new_simulation_log(filename=filepath) -> None:
         print(f"Could not create log file: {e}")
 
 
-def _read_simulation_data(filename=filepath) -> tuple[list[int], list[int], list[int], list[int]]:
+def read_simulation_data(filename=filepath) -> tuple[list[int], list[int], list[int], list[int]]:
     """
     Read simulation data from file and return lists of data.
     Args:
@@ -85,7 +85,7 @@ def create_requests_plot(filename=filepath, save_plot=False) -> None:
         save_plot (bool): Whether to save the plot as a PNG file.
     """
     # Read data from file
-    time_steps, served, expired, queued = _read_simulation_data(filename)
+    time_steps, served, expired, queued = read_simulation_data(filename)
 
     # Check if data is available
     if not time_steps:
@@ -125,7 +125,7 @@ def print_summary_stats(filename=filepath) -> None:
     Args:
         filename (str): File to read data from.
     """
-    time_steps, served, expired, queued = _read_simulation_data(filename)
+    time_steps, served, expired, queued = read_simulation_data(filename)
 
     if not time_steps:
         print("No data found")
