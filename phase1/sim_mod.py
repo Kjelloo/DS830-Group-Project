@@ -148,11 +148,11 @@ def init_state(drivers: list[dict], requests: list[dict], timeout: int, req_rate
         "pending": requests,
         "served": 0,
         "expired": 0,
-        "timeout": int(timeout),
+        "timeout": timeout,
         "served_waits": [],
-        "req_rate": float(req_rate),
-        "width": int(width),
-        "height": int(height),
+        "req_rate": req_rate,
+        "width": width,
+        "height": height,
     }
 
 
