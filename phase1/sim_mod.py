@@ -42,7 +42,7 @@ def _is_state_dict(s: dict) -> bool:
 
 def init_state(drivers: list[dict], requests: list[dict], timeout: int, req_rate: float, width: int = 50, height: int = 30) -> dict:
     """
-    Build the initial simulation state (t = 0), put requests into pending or future based on t.
+    Build the initial simulation state (t = 0).
 
     Args:
         drivers (list[dict]): List of driver dictionaries.
@@ -76,6 +76,30 @@ def init_state(drivers: list[dict], requests: list[dict], timeout: int, req_rate
     Traceback (most recent call last):
         ...
     ValueError: All request dictionaries must contain the required keys: 'id', 't', 'px', 'py', 'dx', 'dy', 'driver_id', 'status', 't_wait'.
+
+    Test with invalid timeout (non-positive):
+    >>> init_state(drivers_test, requests_test, -5, 0.5, 100, 100)
+    Traceback (most recent call last):
+        ...
+    ValueError: Timeout must be a positive integer.
+
+    Test with invalid request rate (negative):
+    >>> init_state(drivers_test, requests_test, 30, -1.0, 100, 100)
+    Traceback (most recent call last):
+        ...
+    ValueError: Request rate must be a non-negative number.
+
+    Test with invalid width (non-positive):
+    >>> init_state(drivers_test, requests_test, 30, 0.5, -100, 100)
+    Traceback (most recent call last):
+        ...
+    ValueError: Width must be a positive integer.
+
+    Test with invalid height (non-positive):
+    >>> init_state(drivers_test, requests_test, 30, 0.5, 100, 0)
+    Traceback (most recent call last):
+        ...
+    ValueError: Height must be a positive integer.
 
     Test output state structure:
     >>> state_test = init_state(drivers_test, requests_test, 30, 0.5, 100, 100)
