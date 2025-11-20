@@ -6,6 +6,7 @@ else:
     from phase1 import io_mod
 from typing import Optional
 
+
 def _is_driver_dict(d: dict) -> bool:
     """
     Check if a dictionary has all required keys for a driver.
@@ -36,11 +37,13 @@ def _is_state_dict(s: dict) -> bool:
     Returns:
         bool: True if all required keys are present, False otherwise.
     """
-    required_keys = {"t", "drivers", "pending", "served", "expired", "timeout", "served_waits", "req_rate", "width", "height"}
+    required_keys = {"t", "drivers", "pending", "served", "expired", "timeout", "served_waits", "req_rate", "width",
+                     "height"}
     return required_keys.issubset(s.keys())
 
 
-def init_state(drivers: list[dict], requests: list[dict], timeout: int, req_rate: float, width: int = 50, height: int = 30) -> dict:
+def init_state(drivers: list[dict], requests: list[dict], timeout: int, req_rate: float, width: int = 50,
+               height: int = 30) -> dict:
     """
     Build the initial simulation state (t = 0).
 
@@ -65,6 +68,8 @@ def init_state(drivers: list[dict], requests: list[dict], timeout: int, req_rate
     >>> len(state["pending"])
     1
 
+    Tests
+    --------
     Test with invalid driver dictionary (missing keys):
     >>> init_state([{"id": 1, "x": 0, "y": 0}], requests_test, 30, 0.5, 100, 100)
     Traceback (most recent call last):
@@ -119,10 +124,12 @@ def init_state(drivers: list[dict], requests: list[dict], timeout: int, req_rate
         raise ValueError("All drivers must be dictionaries.")
 
     if not all(_is_driver_dict(d) for d in drivers):
-        raise ValueError("All driver dictionaries must contain the required keys: 'id', 'x', 'y', 'vx', 'vy', 'tx', 'ty', 'target_id'.")
+        raise ValueError(
+            "All driver dictionaries must contain the required keys: 'id', 'x', 'y', 'vx', 'vy', 'tx', 'ty', 'target_id'.")
 
     if not all(_is_request_dict(r) for r in requests):
-        raise ValueError("All request dictionaries must contain the required keys: 'id', 't', 'px', 'py', 'dx', 'dy', 'driver_id', 'status', 't_wait'.")
+        raise ValueError(
+            "All request dictionaries must contain the required keys: 'id', 't', 'px', 'py', 'dx', 'dy', 'driver_id', 'status', 't_wait'.")
 
     if not all(isinstance(r, dict) for r in requests):
         raise ValueError("All requests must be dictionaries.")
@@ -174,6 +181,8 @@ def simulate_step(state: dict) -> tuple[dict, dict]:
     Returns:
         tuple[dict, dict]: Updated state and metrics dictionary.
 
+    Tests
+    --------
     Test with a simple scenario of one driver and one request:
     >>> drivers = [{"id": 1, "x": 1, "y": 1, "vx": 0, "vy": 0, "tx": 0, "ty": 0, "target_id": None}]
     >>> requests_list = [{"id": 10, "t": 0, "px": 5, "py": 5, "dx": 10, "dy": 10, "driver_id": None, "status": "waiting", "t_wait": 0}]
@@ -245,13 +254,11 @@ def _assign_requests(drivers: list[dict], requests: list[dict]) -> None:
         if not _is_driver_dict(d):
             raise ValueError("Driver dictionary is missing required keys.")
 
-
     # Iteratively assigns driver to request if requests exists and drivers are available.
     for request in requests:
         if request["status"] == "waiting":
             closest_driver = _calculate_closest_driver(request, drivers)
             if closest_driver is not None:
-
                 closest_driver.update({
                     "target_id": request["id"],
                     "tx": request["px"],
@@ -268,13 +275,14 @@ def _compute_velocity_vector(driver: dict, velocity: int = 5) -> None:
     """
     Computes a velocity vector based on a drivers position and his target.
 
-    Example:
-        >>> driver = {"id":0,"x":14,"y":10,"vx":None,"vy":None,"tx":30,"ty":45,"target_id":None}
-        >>> driver
-        {'id': 0, 'x': 14, 'y': 10, 'vx': None, 'vy': None, 'tx': 30, 'ty': 45, 'target_id': None}
-        >>> _compute_velocity_vector(driver, velocity = 5)
-        >>> driver
-        {'id': 0, 'x': 14, 'y': 10, 'vx': 2.078798801338972, 'vy': 4.547372377929001, 'tx': 30, 'ty': 45, 'target_id': None}
+    Tests
+    --------
+    >>> driver = {"id":0,"x":14,"y":10,"vx":None,"vy":None,"tx":30,"ty":45,"target_id":None}
+    >>> driver
+    {'id': 0, 'x': 14, 'y': 10, 'vx': None, 'vy': None, 'tx': 30, 'ty': 45, 'target_id': None}
+    >>> _compute_velocity_vector(driver, velocity = 5)
+    >>> driver
+    {'id': 0, 'x': 14, 'y': 10, 'vx': 2.078798801338972, 'vy': 4.547372377929001, 'tx': 30, 'ty': 45, 'target_id': None}
     """
 
     # Type and Value error handling
@@ -330,7 +338,7 @@ def _calculate_closest_driver(req: dict, drivers: list[dict]) -> Optional[dict]:
             min_distance = driver_dist
             closest_driver = driver
 
-    return closest_driver # Har testet denne funktion og den virker som den skal.
+    return closest_driver  # Har testet denne funktion og den virker som den skal.
 
 
 def _within_one_step(driver: dict) -> bool:
@@ -494,4 +502,5 @@ def _update_waits(requests: list[dict]):
 
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod()

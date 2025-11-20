@@ -1,5 +1,6 @@
-from datetime import datetime
 import os
+from datetime import datetime
+
 import matplotlib.pyplot as plt
 
 folder = "statistics"
@@ -9,6 +10,7 @@ timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 file_name = f"stats_{timestamp}.csv"
 
 filepath = os.path.join(folder, file_name)
+
 
 def record_step_to_file(state, metrics, filename=filepath) -> None:
     """

@@ -1,86 +1,86 @@
 import random
 
+
 def load_drivers(path: str) -> list[dict]:
-    """Read drivers from a CSV.
+    """ Read drivers from a CSV.
+    - Use x/px/#initial px for x. Use y/py for y.
+    - Skip rows with bad numbers, negatives, or out of bounds (0<=x<=50, 0<=y<=30).
+    - IDs start at 1 for kept rows.
+    - Error if no header or missing x/y.
 
-- Use x/px/#initial px for x. Use y/py for y.
-- Skip rows with bad numbers, negatives, or out of bounds (0<=x<=50, 0<=y<=30).
-- IDs start at 1 for kept rows.
-- Error if no header or missing x/y.
+    Tests
+    --------
+    File not found → empty list (hide prints):
+    >>> import io, contextlib
+    >>> buf = io.StringIO()
+    >>> with contextlib.redirect_stdout(buf):
+    ...     out = load_drivers("data/no_such_file.csv")
+    >>> out
+    []
 
-Examples
---------
-File not found → empty list (hide prints):
->>> import io, contextlib
->>> buf = io.StringIO()
->>> with contextlib.redirect_stdout(buf):
-...     out = load_drivers("data/no_such_file.csv")
->>> out
-[]
+    Wrong headers → ValueError:
+    >>> import tempfile, os
+    >>> bad = "a,b\\n1,2\\n"
+    >>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+    >>> _ = f.write(bad.encode()); f.close()
+    >>> try:
+    ...     _ = load_drivers(f.name)
+    ... except ValueError:
+    ...     print("ValueError")
+    ValueError
+    >>> os.unlink(f.name)
 
-Wrong headers → ValueError:
->>> import tempfile, os
->>> bad = "a,b\\n1,2\\n"
->>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
->>> _ = f.write(bad.encode()); f.close()
->>> try:
-...     _ = load_drivers(f.name)
-... except ValueError:
-...     print("ValueError")
-ValueError
->>> os.unlink(f.name)
+    Header aliases (px, py) work:
+    >>> txt = "px,py\\n4,5\\n"
+    >>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+    >>> _ = f.write(txt.encode()); f.close()
+    >>> rows = load_drivers(f.name)
+    >>> len(rows)
+    1
+    >>> rows[0]["x"], rows[0]["y"]
+    (4, 5)
+    >>> os.unlink(f.name)
 
-Header aliases (px, py) work:
->>> txt = "px,py\\n4,5\\n"
->>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
->>> _ = f.write(txt.encode()); f.close()
->>> rows = load_drivers(f.name)
->>> len(rows)
-1
->>> rows[0]["x"], rows[0]["y"]
-(4, 5)
->>> os.unlink(f.name)
+    Skip negatives / out-of-bounds; keep the good row (hide prints):
+    >>> txt = "x,y\\n-1,5\\n5,31\\n50,30\\n"
+    >>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+    >>> _ = f.write(txt.encode()); f.close()
+    >>> buf = io.StringIO()
+    >>> with contextlib.redirect_stdout(buf):
+    ...     rows = load_drivers(f.name)
+    >>> len(rows)
+    1
+    >>> rows[0]["x"], rows[0]["y"]
+    (50, 30)
+    >>> os.unlink(f.name)
 
-Skip negatives / out-of-bounds; keep the good row (hide prints):
->>> txt = "x,y\\n-1,5\\n5,31\\n50,30\\n"
->>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
->>> _ = f.write(txt.encode()); f.close()
->>> buf = io.StringIO()
->>> with contextlib.redirect_stdout(buf):
-...     rows = load_drivers(f.name)
->>> len(rows)
-1
->>> rows[0]["x"], rows[0]["y"]
-(50, 30)
->>> os.unlink(f.name)
+    Skip non-integers; keep the good row (hide prints):
+    >>> txt = "x,y\\nhello,2\\n3,world\\n4,5\\n"
+    >>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+    >>> _ = f.write(txt.encode()); f.close()
+    >>> buf = io.StringIO()
+    >>> with contextlib.redirect_stdout(buf):
+    ...     rows = load_drivers(f.name)
+    >>> len(rows)
+    1
+    >>> rows[0]["x"], rows[0]["y"]
+    (4, 5)
+    >>> os.unlink(f.name)
 
-Skip non-integers; keep the good row (hide prints):
->>> txt = "x,y\\nhello,2\\n3,world\\n4,5\\n"
->>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
->>> _ = f.write(txt.encode()); f.close()
->>> buf = io.StringIO()
->>> with contextlib.redirect_stdout(buf):
-...     rows = load_drivers(f.name)
->>> len(rows)
-1
->>> rows[0]["x"], rows[0]["y"]
-(4, 5)
->>> os.unlink(f.name)
-
-Output shape and types:
->>> txt = "x,y\\n0,0\\n25,10\\n"
->>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
->>> _ = f.write(txt.encode()); f.close()
->>> rows = load_drivers(f.name)
->>> len(rows)
-2
->>> rows[0]["id"], rows[1]["id"]
-(1, 2)
->>> all(isinstance(rows[0][k], int) for k in ["x","y","vx","vy","tx","ty"])
-True
->>> rows[0]["target_id"] is None
-True
->>> os.unlink(f.name)
+    Output shape and types:
+    >>> txt = "x,y\\n0,0\\n25,10\\n"
+    >>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+    >>> _ = f.write(txt.encode()); f.close()
+    >>> rows = load_drivers(f.name)
+    >>> len(rows)
+    2
+    >>> rows[0]["id"], rows[1]["id"]
+    (1, 2)
+    >>> all(isinstance(rows[0][k], int) for k in ["x","y","vx","vy","tx","ty"])
+    True
+    >>> rows[0]["target_id"] is None
+    True
+    >>> os.unlink(f.name)
 
     """
 
@@ -162,16 +162,17 @@ def generate_drivers(n: int, width: int = 50, height: int = 30) -> list[dict]:
     Returns a list of dictionaries where each dictionary represents a driver,
     or crashes the simulation if TypeErrors or ValueErrors are raised.
 
-    Example:
-        >>> import random
-        >>> random.seed(20)
-        >>> drivers = generate_drivers(n=3, width=50, height=50)
-        >>> for driver in drivers:
-        ...     print(driver)
-        ...
-        {'id': 0, 'x': 46, 'y': 43, 'vx': 0, 'vy': 0, 'tx': None, 'ty': None, 'target_id': None}
-        {'id': 1, 'x': 50, 'y': 49, 'vx': 0, 'vy': 0, 'tx': None, 'ty': None, 'target_id': None}
-        {'id': 2, 'x': 9, 'y': 16, 'vx': 0, 'vy': 0, 'tx': None, 'ty': None, 'target_id': None}
+    Tests
+    --------
+    >>> import random
+    >>> random.seed(20)
+    >>> drivers = generate_drivers(n=3, width=50, height=50)
+    >>> for driver in drivers:
+    ...     print(driver)
+    ...
+    {'id': 0, 'x': 46, 'y': 43, 'vx': 0, 'vy': 0, 'tx': None, 'ty': None, 'target_id': None}
+    {'id': 1, 'x': 50, 'y': 49, 'vx': 0, 'vy': 0, 'tx': None, 'ty': None, 'target_id': None}
+    {'id': 2, 'x': 9, 'y': 16, 'vx': 0, 'vy': 0, 'tx': None, 'ty': None, 'target_id': None}
     """
     # Type and value handling of parameters.
     params = {
@@ -206,90 +207,89 @@ def generate_drivers(n: int, width: int = 50, height: int = 30) -> list[dict]:
 
 def load_requests(path: str) -> list[dict]:
     """
-        Load and validate delivery requests from a CSV file, converting them
-        into request in a dictionary.
+    Load and validate delivery requests from a CSV file, converting them
+    into request in a dictionary.
 
-        Each request represents a delivery with pickup and delivery
-        coordinates, with a request time.
+    Each request represents a delivery with pickup and delivery
+    coordinates, with a request time.
 
-        The resulting schema for each request is: \n
-        {
-            'id': int,              # unique sequential identifier \n
-            't': int,               # request time \n
-            'px': int,              # pickup x-coordinate \n
-            'py': int,              # pickup y-coordinate \n
-            'dx': int,              # delivery x-coordinate \n
-            'dy': int,              # delivery y-coordinate \n
-            'driver_id': None,      # driver associated with the request (None if unassigned) \n
-            'status': 'waiting'     # request status
-        }
+    The resulting schema for each request is: \n
+    {
+        'id': int,              # unique sequential identifier \n
+        't': int,               # request time \n
+        'px': int,              # pickup x-coordinate \n
+        'py': int,              # pickup y-coordinate \n
+        'dx': int,              # delivery x-coordinate \n
+        'dy': int,              # delivery y-coordinate \n
+        'driver_id': None,      # driver associated with the request (None if unassigned) \n
+        'status': 'waiting'     # request status
+    }
 
-        Args:
-            path (str): Path to the CSV file containing request data.
+    Args:
+        path (str): Path to the CSV file containing request data.
 
-        Returns:
-            list[dict]: A list of request dictionaries following the above schema.
+    Returns:
+        list[dict]: A list of request dictionaries following the above schema.
 
-        Notes:
-            - The grid boundaries are fixed at max_x = 50 and max_y = 30.
-            - Requests with out-of-bounds coordinates are skipped.
-            - The unique `id` field is assigned incrementally starting from 1.
-
-                    Examples
-        --------
-        Simple good row:
-        >>> import tempfile, os
-        >>> txt = "#request time,pickup x,pickup y,delivery x,delivery y\\n7,5,5,5,5\\n"
-        >>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
-        >>> _ = f.write(txt.encode()); f.close()
-        >>> out = load_requests(f.name)
-        >>> len(out)
-        1
-        >>> out[0]["t"], out[0]["px"], out[0]["py"], out[0]["dx"], out[0]["dy"]
-        (7, 5, 5, 5, 5)
-        >>> os.unlink(f.name)
-
-        Non-integer value -> ValueError:
-        >>> bad = "#request time,pickup x,pickup y,delivery x,delivery y\\nhello,1,2,3,4\\n"
-        >>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
-        >>> _ = f.write(bad.encode()); f.close()
-        >>> try:
-        ...     _ = load_requests(f.name)
-        ... except ValueError:
-        ...     print("ValueError")
-        ValueError
-        >>> os.unlink(f.name)
-
-        Drop bad rows (t<0 or out of bounds). Keep only the valid one:
-        >>> txt = (
-        ...     "#request time,pickup x,pickup y,delivery x,delivery y\\n"
-        ...     "-1,0,0,0,0\\n"    # drop: t < 0
-        ...     "0,60,0,0,0\\n"    # drop: px > 50
-        ...     "0,0,0,0,31\\n"    # drop: dy > 30
-        ...     "0,1,2,3,4\\n"     # keep
-        ... )
-        >>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
-        >>> _ = f.write(txt.encode()); f.close()
-        >>> out = load_requests(f.name)
-        >>> len(out)
-        1
-        >>> out[0]["t"], out[0]["px"], out[0]["py"], out[0]["dx"], out[0]["dy"]
-        (0, 1, 2, 3, 4)
-        >>> os.unlink(f.name)
-
-                Wrong or missing headers → Exception:
-        >>> import tempfile, os
-        >>> bad = "a,b\\n1,2\\n"
-        >>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
-        >>> _ = f.write(bad.encode()); f.close()
-        >>> try:
-        ...     _ = load_requests(f.name)
-        ... except Exception:
-        ...     print("Exception")
-        Exception
-        >>> os.unlink(f.name)
+    Notes:
+        - The grid boundaries are fixed at max_x = 50 and max_y = 30.
+        - Requests with out-of-bounds coordinates are skipped.
+        - The unique `id` field is assigned incrementally starting from 1.
 
 
+    Tests
+    --------
+    Simple good row:
+    >>> import tempfile, os
+    >>> txt = "#request time,pickup x,pickup y,delivery x,delivery y\\n7,5,5,5,5\\n"
+    >>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+    >>> _ = f.write(txt.encode()); f.close()
+    >>> out = load_requests(f.name)
+    >>> len(out)
+    1
+    >>> out[0]["t"], out[0]["px"], out[0]["py"], out[0]["dx"], out[0]["dy"]
+    (7, 5, 5, 5, 5)
+    >>> os.unlink(f.name)
+
+    Non-integer value -> ValueError:
+    >>> bad = "#request time,pickup x,pickup y,delivery x,delivery y\\nhello,1,2,3,4\\n"
+    >>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+    >>> _ = f.write(bad.encode()); f.close()
+    >>> try:
+    ...     _ = load_requests(f.name)
+    ... except ValueError:
+    ...     print("ValueError")
+    ValueError
+    >>> os.unlink(f.name)
+
+    Drop bad rows (t<0 or out of bounds). Keep only the valid one:
+    >>> txt = (
+    ...     "#request time,pickup x,pickup y,delivery x,delivery y\\n"
+    ...     "-1,0,0,0,0\\n"    # drop: t < 0
+    ...     "0,60,0,0,0\\n"    # drop: px > 50
+    ...     "0,0,0,0,31\\n"    # drop: dy > 30
+    ...     "0,1,2,3,4\\n"     # keep
+    ... )
+    >>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+    >>> _ = f.write(txt.encode()); f.close()
+    >>> out = load_requests(f.name)
+    >>> len(out)
+    1
+    >>> out[0]["t"], out[0]["px"], out[0]["py"], out[0]["dx"], out[0]["dy"]
+    (0, 1, 2, 3, 4)
+    >>> os.unlink(f.name)
+
+            Wrong or missing headers → Exception:
+    >>> import tempfile, os
+    >>> bad = "a,b\\n1,2\\n"
+    >>> f = tempfile.NamedTemporaryFile(delete=False, suffix=".csv")
+    >>> _ = f.write(bad.encode()); f.close()
+    >>> try:
+    ...     _ = load_requests(f.name)
+    ... except Exception:
+    ...     print("Exception")
+    Exception
+    >>> os.unlink(f.name)
     """
     # Define grid boundaries for valid coordinates
     max_x, max_y = 50, 30
@@ -349,19 +349,20 @@ def generate_requests(start_t: int, out_list: list,
     Probabilistically appends requests to out_list if input is correct or raises ValueError
     or TypeError if needed and crashes the simulation.
 
-    Example:
-        >>> import random
-        >>> reqs = []
-        >>> random.seed(20)
-        >>> generate_requests(start_t=0,out_list=reqs,req_rate=40,width=50,height=30)
-        >>> generate_requests(start_t=1,out_list=reqs,req_rate=40,width=50,height=30)
-        >>> generate_requests(start_t=2,out_list=reqs,req_rate=40,width=50,height=30)
-        >>> for req in reqs:
-        ...     print(req)
-        ...
-        {'id': 0, 't': 0, 'px': 43, 'py': 25, 'dx': 49, 'dy': 28, 't_wait': 0, 'status': 'waiting', 'driver_id': None}
-        {'id': 1, 't': 1, 'px': 16, 'py': 21, 'dx': 40, 'dy': 27, 't_wait': 0, 'status': 'waiting', 'driver_id': None}
-        {'id': 2, 't': 2, 'px': 20, 'py': 18, 'dx': 10, 'dy': 0, 't_wait': 0, 'status': 'waiting', 'driver_id': None}
+    Tests
+    --------
+    >>> import random
+    >>> reqs = []
+    >>> random.seed(20)
+    >>> generate_requests(start_t=0,out_list=reqs,req_rate=40,width=50,height=30)
+    >>> generate_requests(start_t=1,out_list=reqs,req_rate=40,width=50,height=30)
+    >>> generate_requests(start_t=2,out_list=reqs,req_rate=40,width=50,height=30)
+    >>> for req in reqs:
+    ...     print(req)
+    ...
+    {'id': 0, 't': 0, 'px': 43, 'py': 25, 'dx': 49, 'dy': 28, 't_wait': 0, 'status': 'waiting', 'driver_id': None}
+    {'id': 1, 't': 1, 'px': 16, 'py': 21, 'dx': 40, 'dy': 27, 't_wait': 0, 'status': 'waiting', 'driver_id': None}
+    {'id': 2, 't': 2, 'px': 20, 'py': 18, 'dx': 10, 'dy': 0, 't_wait': 0, 'status': 'waiting', 'driver_id': None}
     """
 
     # Type handling of out_list
@@ -408,6 +409,8 @@ def generate_requests(start_t: int, out_list: list,
         }
         out_list.append(req)
 
+
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod()
