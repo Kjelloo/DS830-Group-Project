@@ -931,4 +931,5 @@ FodyWeavers.xsd
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,visualstudio,visualstudiocode,openframeworks+visualstudio,python,pycharm,pycharm+iml,pycharm+all,windows
 /statistics
+/phase1/statistics
 /phase1/.idea/

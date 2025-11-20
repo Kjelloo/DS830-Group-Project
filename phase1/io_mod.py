@@ -368,27 +368,33 @@ def generate_requests(start_t: int, out_list: list,
     if not (isinstance(out_list, list)):
         raise TypeError("out_list must be of type list.")
 
-    # Type and value error handling of start_t, req_rate, width, and height.
-    params = {
-        "start_t": start_t,
-        "req_rate": req_rate,
-        "width": width,
-        "height": height
-    }
-    for key, val in params.items():
-        if key == "req_rate":
-            if not (isinstance(val, float) or isinstance(val, int)):
-                raise TypeError("req_rate must be of type int/float.")
-        else:
-            if not (isinstance(val, int) or (isinstance(val, float) and val.is_integer())):
-                raise TypeError(f"{key} must be an integer.")
-            if 0 > val:
-                raise ValueError(f"{key} must be larger than or equal to 0.")
+    # Validate start_t
+    if not (isinstance(start_t, int) or (isinstance(start_t, float) and start_t.is_integer())):
+        raise TypeError("start_t must be an integer.")
+    if start_t < 0:
+        raise ValueError("start_t must be larger than or equal to 0.")
+
+    # Validate req_rate
+    if not (isinstance(req_rate, int) or isinstance(req_rate, float)):
+        raise TypeError("req_rate must be of type int/float.")
+    if req_rate < 0:
+        raise ValueError("req_rate must be larger than or equal to 0.")
+
+    # Validate width
+    if not (isinstance(width, int) or (isinstance(width, float) and width.is_integer())):
+        raise TypeError("width must be an integer.")
+    if width < 0:
+        raise ValueError("width must be larger than or equal to 0.")
+
+    # Validate height
+    if not (isinstance(height, int) or (isinstance(height, float) and height.is_integer())):
+        raise TypeError("height must be an integer.")
+    if height < 0:
+        raise ValueError("height must be larger than or equal to 0.")
 
     # Probabilistic generation of requests
-    req_per_step = req_rate
     largest_id = max((d["id"] for d in out_list), default=-1)
-    if random.random() < req_per_step:
+    if random.random() < req_rate:
         req = {
             "id": 0 if largest_id == -1 else largest_id + 1,
             "t": start_t,
@@ -401,3 +407,7 @@ def generate_requests(start_t: int, out_list: list,
             "driver_id": None
         }
         out_list.append(req)
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
