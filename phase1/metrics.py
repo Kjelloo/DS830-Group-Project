@@ -1,8 +1,18 @@
-import matplotlib.pyplot as plt
+import os
 from datetime import datetime
 
+import matplotlib.pyplot as plt
 
-def record_step_to_file(state, metrics, filename="simulation_data.txt") -> None:
+folder = "statistics"
+os.makedirs(folder, exist_ok=True)
+
+timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+file_name = f"stats_{timestamp}.csv"
+
+filepath = os.path.join(folder, file_name)
+
+
+def record_step_to_file(state, metrics, filename=filepath) -> None:
     """
     Record a single simulation step to a text file.
 
@@ -24,7 +34,7 @@ def record_step_to_file(state, metrics, filename="simulation_data.txt") -> None:
         print(f"Could not write to file: {e}")
 
 
-def start_new_simulation_log(filename="simulation_data.txt") -> None:
+def start_new_simulation_log(filename=filepath) -> None:
     """
     Start a new simulation by creating/clearing the data file with headers.
     Args:
@@ -37,7 +47,7 @@ def start_new_simulation_log(filename="simulation_data.txt") -> None:
         print(f"Could not create log file: {e}")
 
 
-def _read_simulation_data(filename="simulation_data.txt") -> tuple[list[int], list[int], list[int], list[int]]:
+def read_simulation_data(filename=filepath) -> tuple[list[int], list[int], list[int], list[int]]:
     """
     Read simulation data from file and return lists of data.
     Args:
@@ -68,7 +78,7 @@ def _read_simulation_data(filename="simulation_data.txt") -> tuple[list[int], li
     return time_steps, served, expired, queued
 
 
-def create_requests_plot(filename="simulation_data.txt", save_plot=False) -> None:
+def create_requests_plot(filename=filepath, save_plot=False) -> None:
     """
     Create and display a plot of served, expired, and queued requests over time.
 
@@ -77,7 +87,7 @@ def create_requests_plot(filename="simulation_data.txt", save_plot=False) -> Non
         save_plot (bool): Whether to save the plot as a PNG file.
     """
     # Read data from file
-    time_steps, served, expired, queued = _read_simulation_data(filename)
+    time_steps, served, expired, queued = read_simulation_data(filename)
 
     # Check if data is available
     if not time_steps:
@@ -101,8 +111,7 @@ def create_requests_plot(filename="simulation_data.txt", save_plot=False) -> Non
 
     # Save the plot if requested
     if save_plot:
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        plot_filename = f"simulation_plot_{timestamp}.png"
+        plot_filename = f"statistics/plot_{timestamp}.png"
         try:
             plt.savefig(plot_filename, dpi=300, bbox_inches='tight')
             print(f"Plot saved to: {plot_filename}")
@@ -112,18 +121,17 @@ def create_requests_plot(filename="simulation_data.txt", save_plot=False) -> Non
     plt.show()
 
 
-def print_summary_stats(filename="simulation_data.txt") -> None:
+def print_summary_stats(filename=filepath) -> None:
     """
     Print summary statistics from the simulation data.
     Args:
         filename (str): File to read data from.
     """
-    time_steps, served, expired, queued = _read_simulation_data(filename)
+    time_steps, served, expired, queued = read_simulation_data(filename)
 
     if not time_steps:
         print("No data found")
         return
-
 
     final_served = served[-1] if served else 0
     final_expired = expired[-1] if expired else 0
@@ -143,11 +151,11 @@ def print_summary_stats(filename="simulation_data.txt") -> None:
 
 
 # Simple convenience function to generate everything after simulation
-def generate_report(filename="simulation_data.txt") -> None:
+def generate_report(filename=filepath) -> None:
     """
     Generate complete report with stats and plot.
     Args:
         filename (str): File to read data from.
     """
     print_summary_stats(filename)
-    create_requests_plot(filename)
+    create_requests_plot(filename, True)
