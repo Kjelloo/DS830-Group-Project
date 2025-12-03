@@ -25,7 +25,7 @@ class Request:
         Returns true if the request is still waiting,
         assigned or picked (that is, not delivered or expired).
         """
-        if self.status == "DELIVERED" or self.status == "EXPIRED":
+        if self.status == RequestStatus.DELIVERED or self.status == RequestStatus.EXPIRED:
             return False
         else:
             return True
@@ -35,15 +35,18 @@ class Request:
         Marks the request as assigned.
         """
         self.assigned_driver = driver_id
-        self.status = "ASSIGNED"
+        self.status = RequestStatus.ASSIGNED
         # TO-DO: Implement collection of data
 
     def mark_picked(self, time: int) -> None:
-        self.status = "PICKED"
+        self.status = RequestStatus.PICKED
         # TO-DO: Implement collection of data
 
+    def mark_delivered(self, time: int) -> None:
+        self.status = RequestStatus.DELIVERED
+
     def mark_expired(self, time: int) -> None:
-        self.status = "EXPIRED"
+        self.status = RequestStatus.EXPIRED
         # TO-DO: Implement collection of data
 
     def update_wait(self, current_time: int) -> None:
