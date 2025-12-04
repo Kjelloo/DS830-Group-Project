@@ -1,7 +1,7 @@
-from phase2.Driver import Driver
-from phase2.MutationRule import MutationRule
-from phase2.Request import Request
-from phase2.dispatch.DispatchPolicy import DispatchPolicy
+from Driver import Driver
+from MutationRule import MutationRule
+from Request import Request
+from dispatch.DispatchPolicy import DispatchPolicy
 
 
 class DeliverySimulation:
@@ -19,7 +19,7 @@ class DeliverySimulation:
         self.dispatch_policy = dispatch_policy
         self.mutation_rule = mutation_rule
         self.timeout = timeout
-        self.statistics = statistics # Not defined yet.
+        self.statistics = statistics  # Not defined yet.
 
     def tick(self) -> None:
         """
