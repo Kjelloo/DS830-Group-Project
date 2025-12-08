@@ -1,5 +1,5 @@
 from __future__ import annotations
-from phase2.Point import Point
+import Point
 from enum import Enum
 
 class RequestStatus(Enum):
