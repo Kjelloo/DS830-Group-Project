@@ -1,6 +1,8 @@
 from __future__ import annotations
-from phase2.Point import Point
 from enum import Enum
+
+from Point import Point
+
 
 class RequestStatus(Enum):
     WAITING = 1
@@ -8,6 +10,8 @@ class RequestStatus(Enum):
     PICKED = 3
     DELIVERED = 4
     EXPIRED = 5
+
+
 
 class Request:
     def __init__(self, id: int, pick_up: Point, drop_off: Point, creation_time: int, status: RequestStatus,

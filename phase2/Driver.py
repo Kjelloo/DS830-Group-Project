@@ -6,16 +6,30 @@ if TYPE_CHECKING:
     from phase2.Point import Point
     from phase2.Request import Request
     from phase2.behaviour.DriverBehaviour import DriverBehaviour
+from dataclasses import dataclass
 from enum import Enum
+
+from Point import Point
+from Request import Request
+from behaviour.DriverBehaviour import DriverBehaviour
+
 
 class DriverStatus(Enum):
     IDLE = 1,
     TO_PICKUP = 2
     TO_DROPOFF = 3
 
+
+@dataclass
+class DriverHistoryEntry:
+    request: Request
+    pickup_time: int
+    dropoff_time: int
+
+
 class Driver:
-    def __init__(self, id: int, position: 'Point', speed: float, status: DriverStatus, current_request: "'Request' | None",
-                 behaviour: 'DriverBehaviour', history: list) -> None:
+    def __init__(self, id: int, position: Point, speed: float, status: DriverStatus, current_request: Request | None,
+                 behaviour: DriverBehaviour, history: list[DriverHistoryEntry]) -> None:
         self.id = id
         self.position = position
         self.speed = speed

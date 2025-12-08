@@ -1,7 +1,12 @@
-from phase2.Driver import Driver
-from phase2.Offer import Offer
+from __future__ import annotations
 
-from phase2.behaviour.DriverBehaviour import DriverBehaviour
+from typing import TYPE_CHECKING
+
+from behaviour.DriverBehaviour import DriverBehaviour
+
+if TYPE_CHECKING:
+    from Driver import Driver
+    from Offer import Offer
 
 
 class EarningsMaxBehaviour(DriverBehaviour):
