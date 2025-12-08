@@ -72,7 +72,7 @@ class RequestGenerator:
             self.next_id += 1
 
         return new_requests
-    
+
 if __name__ == "__main__":
     rg = RequestGenerator(rate=1.5, width=10, height=5, start_id=0)
 
