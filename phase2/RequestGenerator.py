@@ -20,11 +20,6 @@ class RequestGenerator:
         self.height = height
         self.next_id = start_id
 
-    def __str__(self):
-        return (f"RequestGenerator(rate={self.rate}, "
-                f"width={self.width}, height={self.height}, "
-                f"next_id={self.next_id})")
-
     def maybe_generate(self, time):
         """
         Called once per tick.
@@ -54,10 +49,9 @@ class RequestGenerator:
             dx = random.uniform(0, self.width)
             dy = random.uniform(0, self.height)
 
-            pickup = Point(px, py)      # Point class should exist in the same file
+            pickup = Point(px, py)
             dropoff = Point(dx, dy)
 
-            # Request class should also exist in the same file
             req = Request(
                 id=self.next_id,
                 pick_up=pickup,
@@ -74,9 +68,9 @@ class RequestGenerator:
         return new_requests
 
 if __name__ == "__main__":
-    rg = RequestGenerator(rate=1.5, width=10, height=5, start_id=0)
+    rg = RequestGenerator(rate=1, width=10, height=5, start_id=0)
 
-    for t in range(5):
+    for t in range(1):
         new_reqs = rg.maybe_generate(t)
         for req in new_reqs:
-            print(f"time {t}: {str(req)}")
+            print(f"{req}")

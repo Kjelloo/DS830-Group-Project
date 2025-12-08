@@ -20,6 +20,11 @@ class Request:
         self.assigned_driver = assigned_driver
         self.wait_time = wait_time
 
+    def __str__(self) -> str:
+        return f"Request(id={self.id}, pick_up={self.pick_up}, drop_off={self.drop_off}, "\
+               f"creation_time={self.creation_time}, status={self.status}, " \
+               f"assigned_driver={self.assigned_driver}, wait_time={self.wait_time})"
+
     def is_active(self) -> bool:
         """
         Returns true if the request is still waiting,

@@ -4,13 +4,13 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from Driver import Driver
-    from Offer import Offer
+    from phase2.Driver import Driver
+    from phase2.Offer import Offer
 
 
 class DriverBehaviour(ABC):
     @abstractmethod
-    def decide(self, driver: 'Driver', offer: 'Offer', time: int) -> bool:
+    def decide(self, driver: Driver, offer: Offer, time: int) -> bool:
         """
         Args:
             driver: Driver instance
@@ -21,9 +21,3 @@ class DriverBehaviour(ABC):
             True if the driver accepts the offer, False otherwise.
         """
         raise NotImplementedError()
-
-    def mutate(self, driver: Driver) -> 'DriverBehaviour':
-        """
-        Returns a mutated version of this behaviour.
-        By default, returns self (no mutation).
-        """

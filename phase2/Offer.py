@@ -9,5 +9,4 @@ class Offer:
     driver: Driver
     request: Request
     estimated_travel_time: float
-    # If we chose a reward based model:
-    # estimated_reward: float
+    estimated_reward: float
