@@ -10,11 +10,11 @@ class RequestStatus(Enum):
     EXPIRED = 5
 
 class Request:
-    def __init__(self, id: int, pick_up: Point, drop_off: Point, creation_time: int, status: RequestStatus,
+    def __init__(self, id: int, pickup: Point, dropoff: Point, creation_time: int, status: RequestStatus,
                  assigned_driver: int | None, wait_time: int) -> None:
         self.id = id
-        self.pick_up = pick_up
-        self.drop_off = drop_off
+        self.pickup = pickup
+        self.dropoff = dropoff
         self.creation_time = creation_time
         self.status = status
         self.assigned_driver = assigned_driver
