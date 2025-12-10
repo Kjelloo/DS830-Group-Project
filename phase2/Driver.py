@@ -4,11 +4,10 @@ import math
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from phase2.Point import Point
-    from phase2.Request import Request
-    from phase2.behaviour.DriverBehaviour import DriverBehaviour
+    from Point import Point
+    from Request import Request
+    from behaviour.DriverBehaviour import DriverBehaviour
 from enum import Enum
-
 
 class DriverStatus(Enum):
     IDLE = 1,
@@ -43,7 +42,6 @@ class Driver:
         self.status = DriverStatus.TO_PICKUP
         self.current_request.mark_assigned(self.id)
         self.direction_vector()
-        # TO-DO: Implement data collection
 
     def target_point(self) -> Point | None:
         """
@@ -72,7 +70,6 @@ class Driver:
         self.status = DriverStatus.TO_DROPOFF
         self.current_request.mark_picked(time)
         self.direction_vector()
-        # TO-DO: Implement data collection
 
     def complete_dropoff(self, time: int) -> None:
         """
@@ -81,7 +78,6 @@ class Driver:
         self.status = DriverStatus.IDLE
         self.current_request.mark_delivered(time)
         self.direction_vector()
-        # TO-DO: Implement data collection.
 
     def calc_delivery_estimated_travel_time(self, request: Request) -> float:
         """

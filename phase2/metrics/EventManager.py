@@ -54,14 +54,3 @@ class EventManager:
         events = self.get_events()
         filtered_events = [event for event in events if event.event_type == status]
         return filtered_events
-
-
-if __name__ == '__main__':
-    em = EventManager('events.csv')
-    e1 = Event(timestamp=1,
-               event_type=EventType.REQUEST_ASSIGNED,
-               driver_id=111,
-               request_id=101,
-               wait_time=None)
-    # em.add_event(e1)
-    print(em.get_event_by_type(EventType.BEHAVIOUR_CHANGED))
