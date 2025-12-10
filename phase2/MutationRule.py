@@ -1,10 +1,10 @@
 from random import choice
 
 from Driver import Driver
+from Request import RequestStatus
 from behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
 from behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
 from behaviour.LazyBehaviour import LazyBehaviour
-from Request import RequestStatus
 
 
 class MutationRule:

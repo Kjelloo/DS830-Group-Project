@@ -2,16 +2,19 @@ from __future__ import annotations
 
 import math
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from phase2.Point import Point
     from phase2.Request import Request
     from phase2.behaviour.DriverBehaviour import DriverBehaviour
 from enum import Enum
 
+
 class DriverStatus(Enum):
     IDLE = 1,
     TO_PICKUP = 2
     TO_DROPOFF = 3
+
 
 class Driver:
     def __init__(self, id: int, position: Point, speed: float, status: DriverStatus, current_request: Request | None,
@@ -33,7 +36,6 @@ class Driver:
             self.dir_vector = (x_normalized, y_normalized)
         else:
             self.dir_vector = None
-
 
     def assign_request(self, request: Request, current_time: int) -> None:
         # Do we need to implement assignment based on behaviour here???
@@ -95,8 +97,8 @@ class Driver:
         """
         Calculates the estimated reward for a given request.
         """
-        base_fare = 5.0 # TODO: Make configurable
-        per_step_rate = 2.0 # TODO: Make configurable
+        base_fare = 5.0  # TODO: Make configurable
+        per_step_rate = 2.0  # TODO: Make configurable
         distance_pickup_to_dropoff = self.calc_delivery_estimated_travel_time(request)
         estimated_reward = base_fare + (per_step_rate * distance_pickup_to_dropoff)
         return estimated_reward

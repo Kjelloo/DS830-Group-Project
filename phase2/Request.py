@@ -1,6 +1,9 @@
 from __future__ import annotations
-import Point
+
 from enum import Enum
+
+import Point
+
 
 class RequestStatus(Enum):
     WAITING = 1
@@ -8,6 +11,7 @@ class RequestStatus(Enum):
     PICKED = 3
     DELIVERED = 4
     EXPIRED = 5
+
 
 class Request:
     def __init__(self, id: int, pick_up: Point, drop_off: Point, creation_time: int, status: RequestStatus,
@@ -21,7 +25,7 @@ class Request:
         self.wait_time = wait_time
 
     def __str__(self) -> str:
-        return f"Request(id={self.id}, pick_up={self.pick_up}, drop_off={self.drop_off}, "\
+        return f"Request(id={self.id}, pick_up={self.pick_up}, drop_off={self.drop_off}, " \
                f"creation_time={self.creation_time}, status={self.status}, " \
                f"assigned_driver={self.assigned_driver}, wait_time={self.wait_time})"
 
