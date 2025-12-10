@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 from random import choice
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from Driver import Driver
     from Request import RequestStatus
+
     from behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
     from behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
     from behaviour.LazyBehaviour import LazyBehaviour

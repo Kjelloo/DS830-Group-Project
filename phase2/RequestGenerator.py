@@ -1,7 +1,11 @@
-import random
+from __future__ import annotations
 
-from Point import Point
-from Request import Request, RequestStatus
+import random
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from Point import Point
+    from Request import Request, RequestStatus
 
 
 class RequestGenerator:

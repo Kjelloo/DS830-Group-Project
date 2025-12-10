@@ -1,6 +1,10 @@
-import os
+from __future__ import annotations
 
-from Event import Event, EventType
+import os
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from Event import Event, EventType
 
 
 class EventManager:

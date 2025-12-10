@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from DriverBehaviour import DriverBehaviour
-
 if TYPE_CHECKING:
+    from DriverBehaviour import DriverBehaviour
     from phase2.Driver import Driver
     from phase2.Offer import Offer
 

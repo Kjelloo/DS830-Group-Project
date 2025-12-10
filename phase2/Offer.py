@@ -1,7 +1,11 @@
-from dataclasses import dataclass
+from __future__ import annotations
 
-from Driver import Driver
-from Request import Request
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from Driver import Driver
+    from Request import Request
 
 
 @dataclass
