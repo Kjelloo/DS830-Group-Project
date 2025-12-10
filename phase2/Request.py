@@ -3,8 +3,6 @@ from __future__ import annotations
 from enum import Enum
 from typing import TYPE_CHECKING
 
-
-
 if TYPE_CHECKING:
     from Point import Point
     from metrics.EventManager import EventManager
@@ -12,12 +10,14 @@ if TYPE_CHECKING:
 
 eventManager = EventManager(filepath="metrics/events.csv")
 
+
 class RequestStatus(Enum):
     WAITING = 1
     ASSIGNED = 2
     PICKED = 3
     DELIVERED = 4
     EXPIRED = 5
+
 
 class Request:
     def __init__(self, id: int, pick_up: Point, drop_off: Point, creation_time: int, status: RequestStatus,

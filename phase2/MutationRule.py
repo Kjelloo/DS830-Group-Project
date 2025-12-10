@@ -1,15 +1,18 @@
 from random import choice
+from typing import TYPE_CHECKING
 
-from Driver import Driver
-from Request import RequestStatus
-from behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
-from behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
-from behaviour.LazyBehaviour import LazyBehaviour
+if TYPE_CHECKING:
+    from Driver import Driver
+    from Request import RequestStatus
+    from behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
+    from behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
+    from behaviour.LazyBehaviour import LazyBehaviour
 
-from metrics.EventManager import EventManager
-from metrics.Event import Event, EventType
+    from metrics.EventManager import EventManager
+    from metrics.Event import Event, EventType
 
 eventManager = EventManager(filepath="metrics/events.csv")
+
 
 class MutationRule:
     def __init__(self, n_trips: int, threshold: float) -> None:

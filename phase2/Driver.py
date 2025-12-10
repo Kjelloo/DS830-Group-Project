@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from behaviour.DriverBehaviour import DriverBehaviour
 from enum import Enum
 
+
 class DriverStatus(Enum):
     IDLE = 1,
     TO_PICKUP = 2
