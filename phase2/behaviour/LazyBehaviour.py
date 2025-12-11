@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from behaviour.DriverBehaviour import DriverBehaviour
+from DriverBehaviour import DriverBehaviour
 
 if TYPE_CHECKING:
-    from Driver import Driver
-    from Offer import Offer
+    from phase2.Driver import Driver
+    from phase2.Offer import Offer
 
 
 class LazyBehaviour(DriverBehaviour):
