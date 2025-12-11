@@ -2,17 +2,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from behaviour.DriverBehaviour import DriverBehaviour
-
 if TYPE_CHECKING:
-    from Driver import Driver
-    from Offer import Offer
+    from DriverBehaviour import DriverBehaviour
+    from phase2.Driver import Driver
+    from phase2.Offer import Offer
 
 
 class EarningsMaxBehaviour(DriverBehaviour):
     def decide(self, driver: Driver, offer: Offer, time: int) -> bool:
         """
-        Accept if the ratio estimated reward divided by travel time is above a
-        threshold.
+        Accept if the ratio estimated reward divided by travel time is above a threshold.
         """
-        pass
+        threshold = 1.0  # TODO: Not sure what a good threshold is yet
+        ratio = offer.estimated_reward / offer.estimated_travel_time
+        return ratio >= threshold

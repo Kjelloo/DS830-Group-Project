@@ -1,6 +1,9 @@
-from ..Driver import Driver, DriverStatus
-from ..Request import Request
-from ..dispatch.DispatchPolicy import DispatchPolicy
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from phase2.Driver import Driver
+    from phase2.Request import Request
+    from phase2.dispatch.DispatchPolicy import DispatchPolicy
 
 
 class GlobalGreedyPolicy(DispatchPolicy):
@@ -38,6 +41,3 @@ class GlobalGreedyPolicy(DispatchPolicy):
                 assigned_requests.add(request.id)
 
         return matched_pairs
-
-if __name__ == "__main__":
-    pass

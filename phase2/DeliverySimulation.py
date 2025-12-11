@@ -1,7 +1,12 @@
-from Driver import Driver
-from MutationRule import MutationRule
-from Request import Request
-from dispatch.DispatchPolicy import DispatchPolicy
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from Driver import Driver
+    from MutationRule import MutationRule
+    from Request import Request
+    from dispatch.DispatchPolicy import DispatchPolicy
 
 
 class DeliverySimulation:

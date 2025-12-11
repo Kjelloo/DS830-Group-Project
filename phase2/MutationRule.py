@@ -1,10 +1,20 @@
-from random import choice
+from __future__ import annotations
 
-from Driver import Driver
-from behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
-from behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
-from behaviour.LazyBehaviour import LazyBehaviour
-from Request import RequestStatus
+from random import choice
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from Driver import Driver
+    from Request import RequestStatus
+
+    from behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
+    from behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
+    from behaviour.LazyBehaviour import LazyBehaviour
+
+    from metrics.EventManager import EventManager
+    from metrics.Event import Event, EventType
+
+eventManager = EventManager(filepath="metrics/events.csv")
 
 
 class MutationRule:
@@ -12,7 +22,7 @@ class MutationRule:
         self.n_trips = n_trips
         self.threshold = threshold
 
-    def maybe_mutate(self, driver: Driver) -> None:
+    def maybe_mutate(self, driver: Driver, time: int) -> None:
         """
          Inspect a driver (and possibly global statistics) and decide whether to update its behaviour or behaviour parameters.
 
@@ -25,12 +35,12 @@ class MutationRule:
 
         # Performance based: if some percentage (threshold) of the last n trip did not deliver on time, change behaviour
         last_n_trips = driver.history[-self.n_trips:]
-        expired_trips = [trips for trips in last_n_trips if trips.request.status == RequestStatus.EXPIRED]
+        expired_trips = [trips for trips in last_n_trips if trips.status == RequestStatus.EXPIRED]
 
         if len(expired_trips) / self.n_trips >= self.threshold:
             self.__mutate_driver(driver)
 
-    def __mutate_driver(self, driver: Driver) -> None:
+    def __mutate_driver(self, driver: Driver, time: int) -> None:
         """
         Mutate the driver's behaviour parameters.
         """
@@ -43,3 +53,5 @@ class MutationRule:
 
         new_behaviour_cls = choice(candidates)
         driver.behaviour = new_behaviour_cls
+
+        eventManager.add_event(Event(time, EventType.BEHAVIOUR_CHANGED, driver.id, None, None))
