@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import math
 
 
@@ -6,6 +7,9 @@ class Point:
     def __init__(self, x: float, y: float) -> None:
         self.x = x
         self.y = y
+
+    def __str__(self):
+        return f"Point(x={self.x}, y={self.y})"
 
     def distance_to(self, other: 'Point') -> float:
         return math.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)

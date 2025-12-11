@@ -933,3 +933,4 @@ FodyWeavers.xsd
 /statistics
 /phase1/statistics
 /phase1/.idea/
+/phase2/metrics/*.csv
