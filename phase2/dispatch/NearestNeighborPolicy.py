@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 class NearestNeighborPolicy(DispatchPolicy):
-    def assign(self, drivers: list[Driver], request: list[Request], time: int) -> list[tuple[Driver, Request]]:
+    def assign(self, drivers: list[Driver], requests: list[Request], time: int, run_id: str) -> list[tuple[Driver, Request]]:
         """
         Repeatedly match the closest idle driver to the closest waiting request.
         """

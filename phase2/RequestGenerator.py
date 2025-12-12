@@ -1,17 +1,22 @@
 from __future__ import annotations
 
 import random
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from Point import Point
-    from Request import Request, RequestStatus
+from Point import Point
+from Request import Request, RequestStatus
+from metrics.EventManager import EventManager
+from metrics.Event import Event, EventType
 
 
 class RequestGenerator:
     """Generate new Request objects during the simulation."""
 
-    def __init__(self, rate, width, height, start_id=0):
+    def __init__(self,
+                 rate: float,
+                 width: int,
+                 height: int,
+                 start_id: int,
+                 run_id: str):
         # rate: expected number of new requests per tick (e.g. 0.5, 1.0, 2.3)
         # width, height: size of the map
         # start_id: first id to use
@@ -24,6 +29,7 @@ class RequestGenerator:
         self.width = width
         self.height = height
         self.next_id = start_id
+        self.run_id = run_id
 
     def maybe_generate(self, time):
         """
@@ -32,6 +38,8 @@ class RequestGenerator:
         Returns a list of new Request objects whose creation_time == time.
         The number of new requests is based on self.rate.
         """
+        eventManager = EventManager(self.run_id)
+
         if time < 0:
             raise ValueError("time must be non-negative")
 
@@ -59,14 +67,16 @@ class RequestGenerator:
 
             req = Request(
                 id=self.next_id,
-                pick_up=pickup,
-                drop_off=dropoff,
+                pickup=pickup,
+                dropoff=dropoff,
                 creation_time=time,
                 status=RequestStatus.WAITING,
                 assigned_driver=None,
-                wait_time=0
+                wait_time=0,
+                run_id=self.run_id,
             )
 
+            eventManager.add_event(Event(time, EventType.REQUEST_GENERATED, None, req.id, None))
             new_requests.append(req)
             self.next_id += 1
 
@@ -74,7 +84,7 @@ class RequestGenerator:
 
 
 if __name__ == "__main__":
-    rg = RequestGenerator(rate=1, width=10, height=5, start_id=0)
+    rg = RequestGenerator(rate=1, width=10, height=5, run_id="test_run")
 
     for t in range(1):
         new_reqs = rg.maybe_generate(t)
