@@ -11,10 +11,17 @@ if TYPE_CHECKING:
 class DispatchPolicy(ABC):
     @abstractmethod
     def assign(self, drivers: list[Driver],
-               request: list[Request],
-               time: int) -> list[tuple[Driver, Request]]:
+               requests: list[Request],
+               time: int,
+               run_id: str) -> list[tuple[Driver, Request]]:
         """
         Returns:
             Proposed (driver, request) pairs for this tick.
         """
         raise NotImplementedError
+
+    def __str__(self) -> str:
+        return self.__class__.__name__
+
+    def __repr__(self) -> str:
+        return self.__str__()

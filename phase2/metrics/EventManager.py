@@ -8,8 +8,12 @@ if TYPE_CHECKING:
 
 
 class EventManager:
-    def __init__(self, filepath: str):
-        self.filepath = filepath
+    def __init__(self, run_id: str):
+        self.filepath = os.path.join(os.path.abspath(os.path.dirname(__file__)), "runs", f"{run_id}.csv")
+
+        dirpath = os.path.dirname(self.filepath)
+        if dirpath and not os.path.exists(dirpath):
+            os.makedirs(dirpath, exist_ok=True)
 
         if not os.path.exists(self.filepath):
             with open(self.filepath, 'w') as f:
