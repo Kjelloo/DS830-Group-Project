@@ -9,14 +9,22 @@ from enum import Enum
 
 
 class DriverStatus(Enum):
-    IDLE = 1,
+    IDLE = 1
     TO_PICKUP = 2
     TO_DROPOFF = 3
 
 
 class Driver:
-    def __init__(self, id: int, position: Point, speed: float, status: DriverStatus, current_request: Request | None,
-                 behaviour: DriverBehaviour, history: list[Request]) -> None:
+    def __init__(self,
+                 id: int,
+                 position: Point,
+                 speed: float,
+                 status: DriverStatus,
+                 current_request: Request | None,
+                 behaviour: DriverBehaviour,
+                 history: list[Request],
+                 run_id: str) -> None:
+
         if not isinstance(id, int):
             raise TypeError(f"id must be int, got {type(id).__name__}")
         if not isinstance(position, Point):
@@ -34,6 +42,8 @@ class Driver:
         for h in history:
             if not isinstance(h, Request):
                 raise TypeError("history list must contain only Request objects")
+        if not isinstance(run_id, str):
+            raise TypeError(f"run_id must be string, got {type(run_id).__name__}")
 
         self.id = id
         self.position = position
@@ -42,23 +52,29 @@ class Driver:
         self.current_request = current_request
         self.behaviour = behaviour
         self.history = history
+        self.run_id = run_id
         self.dir_vector: Point | None = None
+
+    def __str__(self):
+        return f"Driver(id={self.id}, position={self.position}, speed={self.speed}, status={self.status}, " \
+               f"current_request={self.current_request}, behaviour={self.behaviour}, history={self.history})"
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
     def compute_direction_vector(self) -> None:
         target = self.target_point()
-        if target is None:
+        if target is not None:
+            dx = target.x - self.position.x
+            dy = target.y - self.position.y
+            magnitude = math.hypot(dx, dy)
+            if magnitude > 0:
+                self.dir_vector = (dx / magnitude, dy / magnitude)
+            else:
+                self.dir_vector = (0.0, 0.0)
+        else:
             self.dir_vector = None
             return
-
-        dx = target.x - self.position.x
-        dy = target.y - self.position.y
-        mag = math.sqrt(dx * dx + dy * dy)
-
-        if mag == 0:
-            self.dir_vector = None
-            return
-
-        self.dir_vector = Point(dx / mag, dy / mag)
 
     def assign_request(self, request: Request, current_time: int) -> None:
         # Do we need to implement assignment based on behaviour here???
@@ -70,7 +86,6 @@ class Driver:
         self.current_request = request
         self.status = DriverStatus.TO_PICKUP
         self.current_request.mark_assigned(self.id, current_time)
-        self.compute_direction_vector()
         self.compute_direction_vector()
         # TO-DO: Implement data collection
 
@@ -102,6 +117,27 @@ class Driver:
         self.position.x += self.dir_vector.x * self.speed * dt
         self.position.y += self.dir_vector.y * self.speed * dt
 
+    def within_one_step_of_target(self) -> bool:
+        """
+        Checks if the driver is within one step of the target point.
+        """
+        if self.target_point() is None:
+            return False
+        distance_to_target = self.position.distance_to(self.target_point())
+        return distance_to_target <= self.speed
+
+    def expire_current_request(self, time: int) -> None:
+        """
+        Expires the current request.
+        """
+        # NOTE: er det driverens ansvar at expire?
+        if self.current_request is not None:
+            self.current_request.mark_expired(time)
+            self.history.append(self.current_request)
+            self.current_request = None
+            self.status = DriverStatus.IDLE
+            self.compute_direction_vector()
+
     def complete_pickup(self, time: int) -> None:
         """
         Updates the internal state when the pickup is reached.
@@ -112,7 +148,6 @@ class Driver:
         self.status = DriverStatus.TO_DROPOFF
         self.current_request.mark_picked(time)
         self.compute_direction_vector()
-        # TO-DO: Implement data collection
 
     def complete_dropoff(self, time: int) -> None:
         """
@@ -123,8 +158,10 @@ class Driver:
 
         self.status = DriverStatus.IDLE
         self.current_request.mark_delivered(time)
-        self.compute_direction_vector()
         self.history.append(self.current_request)
+        self.current_request = None
+        self.compute_direction_vector()
+
         # Should more be done with the request when drop off is complete??? (Magnus)
         # TODO: Implement data collection.
 

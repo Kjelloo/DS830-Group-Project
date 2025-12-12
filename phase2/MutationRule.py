@@ -1,26 +1,29 @@
 from __future__ import annotations
 
 from random import choice
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from Driver import Driver
-    from Request import RequestStatus
+from Driver import Driver
+from Request import RequestStatus
 
-    from behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
-    from behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
-    from behaviour.LazyBehaviour import LazyBehaviour
+from behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
+from behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
+from behaviour.LazyBehaviour import LazyBehaviour
 
-    from metrics.EventManager import EventManager
-    from metrics.Event import Event, EventType
-
-eventManager = EventManager(filepath="metrics/events.csv")
+from metrics.EventManager import EventManager
+from metrics.Event import Event, EventType
 
 
 class MutationRule:
-    def __init__(self, n_trips: int, threshold: float) -> None:
+    def __init__(self, n_trips: int, threshold: float, run_id: str) -> None:
         self.n_trips = n_trips
         self.threshold = threshold
+        self.run_id = run_id
+
+    def __str__(self) -> str:
+        return f"MutationRule(n_trips={self.n_trips}, threshold={self.threshold})"
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
     def maybe_mutate(self, driver: Driver, time: int) -> None:
         """
@@ -28,6 +31,7 @@ class MutationRule:
 
          Args:
             driver (Driver): The driver to inspect and possibly mutate.
+            time (int): The current simulation time, used for event logging.
         """
 
         if len(driver.history) < self.n_trips:
@@ -38,12 +42,14 @@ class MutationRule:
         expired_trips = [trips for trips in last_n_trips if trips.status == RequestStatus.EXPIRED]
 
         if len(expired_trips) / self.n_trips >= self.threshold:
-            self.__mutate_driver(driver)
+            self.__mutate_driver(driver, time)
 
     def __mutate_driver(self, driver: Driver, time: int) -> None:
         """
         Mutate the driver's behaviour parameters.
         """
+        eventManager = EventManager(self.run_id)
+
         behaviour_classes = [EarningsMaxBehaviour, GreedyDistanceBehaviour, LazyBehaviour]
         current_type = type(driver.behaviour)
         candidates = [b for b in behaviour_classes if b is not current_type]
