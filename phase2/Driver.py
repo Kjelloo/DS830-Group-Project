@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from Point import Point
-    from Request import Request
-    from behaviour.DriverBehaviour import DriverBehaviour
+from phase2.Point import Point
+from phase2.Request import Request
+from phase2.behaviour.DriverBehaviour import DriverBehaviour
 from enum import Enum
 
 
@@ -19,6 +17,24 @@ class DriverStatus(Enum):
 class Driver:
     def __init__(self, id: int, position: Point, speed: float, status: DriverStatus, current_request: Request | None,
                  behaviour: DriverBehaviour, history: list[Request]) -> None:
+        if not isinstance(id, int):
+            raise TypeError(f"id must be int, got {type(id).__name__}")
+        if not isinstance(position, Point):
+            raise TypeError(f"position must be Point, got {type(position).__name__}")
+        if not isinstance(speed, (int, float)):
+            raise TypeError(f"speed must be int or float, got {type(speed).__name__}")
+        if not isinstance(status, DriverStatus):
+            raise TypeError(f"status must be DriverStatus, got {type(status).__name__}")
+        if current_request is not None and not isinstance(current_request, Request):
+            raise TypeError(f"current_request must be Request, got {type(current_request).__name__}")
+        if not isinstance(behaviour, DriverBehaviour):
+            raise TypeError(f"behaviour must be DriverBehaviour, got {type(behaviour).__name__}")
+        if not isinstance(history, list):
+            raise TypeError(f"history must be list, got {type(history).__name__}")
+        for h in history:
+            if not isinstance(h, Request):
+                raise TypeError("history list must contain only Request objects")
+
         self.id = id
         self.position = position
         self.speed = speed
@@ -26,22 +42,35 @@ class Driver:
         self.current_request = current_request
         self.behaviour = behaviour
         self.history = history
-        self.dir_vector = None
+        self.dir_vector: Point | None = None
 
     def compute_direction_vector(self) -> None:
-        if self.target_point() is not None:
-            x, y = self.position.x - self.target_point().x, self.position.y - self.target_point().y
-            magnitude = math.sqrt(x ** 2 + y ** 2)
-            x_normalized, y_normalized = (x / magnitude, y / magnitude)
-            self.dir_vector = (x_normalized, y_normalized)
-        else:
+        target = self.target_point()
+        if target is None:
             self.dir_vector = None
+            return
+
+        dx = target.x - self.position.x
+        dy = target.y - self.position.y
+        mag = math.sqrt(dx * dx + dy * dy)
+
+        if mag == 0:
+            self.dir_vector = None
+            return
+
+        self.dir_vector = Point(dx / mag, dy / mag)
 
     def assign_request(self, request: Request, current_time: int) -> None:
         # Do we need to implement assignment based on behaviour here???
+        if not isinstance(request, Request):
+            raise TypeError(f"request must be Request, got {type(request).__name__}")
+        if not isinstance(current_time, int):
+            raise TypeError(f"current_time must be int, got {type(current_time).__name__}")
+
         self.current_request = request
         self.status = DriverStatus.TO_PICKUP
-        self.current_request.mark_assigned(self.id)
+        self.current_request.mark_assigned(self.id, current_time)
+        self.compute_direction_vector()
         self.compute_direction_vector()
         # TO-DO: Implement data collection
 
@@ -52,16 +81,24 @@ class Driver:
         """
         if self.status == DriverStatus.IDLE:
             return None
-        elif self.status == DriverStatus.TO_PICKUP:
+        if self.current_request is None:
+            return None
+        if self.status == DriverStatus.TO_PICKUP:
             return self.current_request.pickup
-        elif self.status == DriverStatus.TO_DROPOFF:
-            return self.current_request.drop_off
+        if self.status == DriverStatus.TO_DROPOFF:
+            return self.current_request.dropoff
         return None
 
-    def step(self, dt: float) -> None:
+    def step(self, dt: float | int) -> None:
         """
         Moves the driver towards the current target according to speed and time step dt.
         """
+        if not isinstance(dt, (float, int)):
+            raise TypeError(f"dt must be int/float, got {type(dt).__name__}")
+
+        if self.dir_vector is None:
+            return
+
         self.position.x += self.dir_vector.x * self.speed * dt
         self.position.y += self.dir_vector.y * self.speed * dt
 
@@ -69,6 +106,9 @@ class Driver:
         """
         Updates the internal state when the pickup is reached.
         """
+        if not isinstance(time, int):
+            raise TypeError(f"time must be int, got {type(time).__name__}")
+
         self.status = DriverStatus.TO_DROPOFF
         self.current_request.mark_picked(time)
         self.compute_direction_vector()
@@ -78,27 +118,35 @@ class Driver:
         """
         Updates the internal state and history when the dropoff is reached.
         """
+        if not isinstance(time, int):
+            raise TypeError(f"time must be int, got {type(time).__name__}")
+
         self.status = DriverStatus.IDLE
         self.current_request.mark_delivered(time)
         self.compute_direction_vector()
-        # TO-DO: Implement data collection.
+        self.history.append(self.current_request)
+        # Should more be done with the request when drop off is complete??? (Magnus)
+        # TODO: Implement data collection.
 
     def calc_delivery_estimated_travel_time(self, request: Request) -> float:
         """
         Calculates the estimated travel time for a given request.
         """
-        distance_to_pickup = self.position.distance_to(request.pick_up)
-        distance_pickup_to_dropoff = request.pick_up.distance_to(request.drop_off)
-        total_distance = distance_to_pickup + distance_pickup_to_dropoff
-        estimated_travel_time = total_distance / self.speed
-        return estimated_travel_time
+        if not isinstance(request, Request):
+            raise TypeError(f"request must be Request, got {type(request).__name__}")
+
+        d1 = self.position.distance_to(request.pickup) # distance to pickup
+        d2 = request.pickup.distance_to(request.dropoff) # distance from pickup to dropoff
+        return (d1 + d2) / self.speed
 
     def calc_delivery_estimated_reward(self, request: Request) -> float:
         """
         Calculates the estimated reward for a given request.
         """
+        if not isinstance(request, Request):
+            raise TypeError(f"request must be Request, got {type(request).__name__}")
+
         base_fare = 5.0  # TODO: Make configurable
         per_step_rate = 2.0  # TODO: Make configurable
-        distance_pickup_to_dropoff = self.calc_delivery_estimated_travel_time(request)
-        estimated_reward = base_fare + (per_step_rate * distance_pickup_to_dropoff)
-        return estimated_reward
+        travel_time = self.calc_delivery_estimated_travel_time(request)
+        return base_fare + (per_step_rate * travel_time)

@@ -1,10 +1,6 @@
 from __future__ import annotations
-
 import os
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from Event import Event, EventType
+from phase2.metrics.Event import Event, EventType
 
 
 class EventManager:

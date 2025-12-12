@@ -1,15 +1,13 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from Point import Point
-    from metrics.EventManager import EventManager
-    from metrics.Event import Event, EventType
+from phase2.Point import Point
+from phase2.metrics.EventManager import EventManager
+from phase2.metrics.Event import Event, EventType
 
-eventManager = EventManager(filepath="metrics/events.csv")
-
+# TODO: add timestamp to the name.
+eventManager = EventManager(filepath="phase2/metrics/events.csv")
 
 class RequestStatus(Enum):
     WAITING = 1
