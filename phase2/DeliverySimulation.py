@@ -18,6 +18,7 @@ class DeliverySimulation:
                  time: int,
                  drivers: list[Driver],
                  requests: list[Request],
+                 request_generator: RequestGenerator,
                  dispatch_policy: DispatchPolicy,
                  mutation_rule: MutationRule,
                  timeout: int,
@@ -31,11 +32,7 @@ class DeliverySimulation:
         self.timeout = timeout
         self.statistics = statistics
 
-        self.request_generator = RequestGenerator(rate=1.5,
-                                                  width=50,
-                                                  height=30,
-                                                  start_id=0,
-                                                  run_id=run_id)
+        self.request_generator = request_generator
 
         # Unique run identifier used for the EventManager
         self.run_id = run_id
@@ -71,7 +68,6 @@ class DeliverySimulation:
 
         # Compute proposed assignments via dispatch_policy
         proposals = self.dispatch_policy.assign(drivers=self.drivers, requests=self.requests, time=self.time, run_id=self.run_id)
-        print(proposals)
 
         # Make offers and get driver responses
         offers = self._create_offers(proposals)
@@ -173,6 +169,7 @@ class DeliverySimulation:
             if driver.status == DriverStatus.TO_DROPOFF and driver.within_one_step_of_target():
                 driver.position = driver.current_request.dropoff
                 driver.complete_dropoff(self.time)
+                continue
 
             driver.step(dt)
 
@@ -186,12 +183,13 @@ class DeliverySimulation:
 
 if __name__ == "__main__":
     run_id_example = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    request_generator_example = RequestGenerator(rate=0.5, width=50, height=30, start_id=1, run_id=run_id_example)
     delivery_simulation = DeliverySimulation(
         time=0,
         drivers=[
             Driver(id=1,
                    position=Point(10, 20),
-                   speed=1.0,
+                   speed=2.0,
                    behaviour=EarningsMaxBehaviour(),
                    status=DriverStatus.IDLE,
                    current_request=None,
@@ -199,21 +197,30 @@ if __name__ == "__main__":
                    run_id=run_id_example),
             Driver(id=2,
                    position=Point(20, 10),
-                   speed=1.0,
+                   speed=2.0,
                    behaviour=GreedyDistanceBehaviour(),
                    status=DriverStatus.IDLE,
                    current_request=None,
                    history=[],
                    run_id=run_id_example),
         ],
-        requests=[],
+        requests=[
+            Request(id=1,
+                    pickup=Point(15, 25),
+                    dropoff=Point(30, 30),
+                    creation_time=0,
+                    status=RequestStatus.WAITING,
+                    assigned_driver=None,
+                    wait_time=0,
+                    run_id=run_id_example),
+        ],
         dispatch_policy=GlobalGreedyPolicy(),
         mutation_rule=MutationRule(n_trips=5, threshold=0.4, run_id=run_id_example),
         timeout=30,
         statistics={},
         run_id=run_id_example,
+        request_generator=request_generator_example
     )
 
-    for _ in range(3):
+    for _ in range(20):
         delivery_simulation.tick()
-        # print(delivery_simulation)

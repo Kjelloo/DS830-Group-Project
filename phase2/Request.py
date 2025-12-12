@@ -63,7 +63,7 @@ class Request:
     def mark_picked(self, time: int) -> None:
         self.status = RequestStatus.PICKED
 
-        self.eventManager.add_event(Event(time, EventType.REQUEST_PICKED, self.id, self.id, None))
+        self.eventManager.add_event(Event(time, EventType.REQUEST_PICKED, self.assigned_driver, self.id, None))
 
     def mark_delivered(self, time: int) -> None:
         self.status = RequestStatus.DELIVERED

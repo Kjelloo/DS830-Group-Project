@@ -44,11 +44,15 @@ class Driver:
         return self.__str__()
 
     def compute_direction_vector(self) -> None:
-        if self.target_point() is not None:
-            x, y = self.position.x - self.target_point().x, self.position.y - self.target_point().y
-            magnitude = math.sqrt(x ** 2 + y ** 2)
-            x_normalized, y_normalized = (x / magnitude, y / magnitude)
-            self.dir_vector = (x_normalized, y_normalized)
+        target = self.target_point()
+        if target is not None:
+            dx = target.x - self.position.x
+            dy = target.y - self.position.y
+            magnitude = math.hypot(dx, dy)
+            if magnitude > 0:
+                self.dir_vector = (dx / magnitude, dy / magnitude)
+            else:
+                self.dir_vector = (0.0, 0.0)
         else:
             self.dir_vector = None
 
@@ -75,8 +79,8 @@ class Driver:
         """
         Moves the driver towards the current target according to speed and time step dt.
         """
-        self.position.x += self.dir_vector.x * self.speed * dt
-        self.position.y += self.dir_vector.y * self.speed * dt
+        self.position.x += self.dir_vector[0] * self.speed * dt
+        self.position.y += self.dir_vector[1] * self.speed * dt
 
     def within_one_step_of_target(self) -> bool:
         """
