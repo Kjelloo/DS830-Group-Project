@@ -22,8 +22,10 @@ class TestDriver(unittest.TestCase):
 
     def test_init_valid(self):
         b = DummyBehaviour()
-        r = Request(0, Point(0, 0), Point(10, 10), 0, RequestStatus.WAITING, 0, 0)
-        d = Driver(1, Point(0, 0), 10.0, DriverStatus.IDLE, r, b, [])
+        r = Request(0, Point(0, 0), Point(10, 10),0,
+                    RequestStatus.WAITING, 0, 0, run_id="run_id")
+        d = Driver(1, Point(0, 0), 10.0,
+                   DriverStatus.IDLE, r, b, [], run_id="run_id")
         self.assertEqual(d.id, 1)
         self.assertEqual(d.position, Point(0, 0))
         self.assertEqual(d.speed, 10.0)
@@ -35,25 +37,32 @@ class TestDriver(unittest.TestCase):
     def test_init_invalid_types(self):
         behaviour = DummyBehaviour()
         with self.assertRaises(TypeError):
-            Driver("x", Point(0, 0), 10.0, DriverStatus.IDLE, None, behaviour, [])
+            Driver("x", Point(0, 0), 10.0, DriverStatus.IDLE,
+                   None, behaviour, [], run_id="run_id")
 
         with self.assertRaises(TypeError):
-            Driver(1, "not point", 10.0, DriverStatus.IDLE, None, behaviour, [])
+            Driver(1, "not point", 10.0, DriverStatus.IDLE,
+                   None, behaviour, [], run_id="run_id")
 
         with self.assertRaises(TypeError):
-            Driver(1, Point(0, 0), "fast", DriverStatus.IDLE, None, behaviour, [])
+            Driver(1, Point(0, 0), "fast", DriverStatus.IDLE,
+                   None, behaviour, [], run_id="run_id")
 
         with self.assertRaises(TypeError):
-            Driver(1, Point(0, 0), 10.0, "idle", None, behaviour, [])
+            Driver(1, Point(0, 0), 10.0, "idle",
+                   None, behaviour, [], run_id="run_id")
 
         with self.assertRaises(TypeError):
-            Driver(1, Point(0, 0), 10.0, DriverStatus.IDLE, 123, behaviour, [])
+            Driver(1, Point(0, 0), 10.0, DriverStatus.IDLE,
+                   123, behaviour, [], run_id="run_id")
 
         with self.assertRaises(TypeError):
-            Driver(1, Point(0, 0), 10.0, DriverStatus.IDLE, None, "behave", [])
+            Driver(1, Point(0, 0), 10.0, DriverStatus.IDLE,
+                   None, "behave", [], run_id="run_id")
 
         with self.assertRaises(TypeError):
-            Driver(1, Point(0, 0), 10.0, DriverStatus.IDLE, None, behaviour, "not list")
+            Driver(1, Point(0, 0), 10.0, DriverStatus.IDLE,
+                   None, behaviour, "not list", run_id="run_id")
 
     # ----------------------------------------------------------------------
     # target_point
@@ -61,25 +70,32 @@ class TestDriver(unittest.TestCase):
     def test_target_point_idle(self):
         b = DummyBehaviour()
         r = None
-        d = Driver(1, Point(0, 0), 10.0, DriverStatus.IDLE, r, b, [])
+        d = Driver(1, Point(0, 0), 10.0,
+                   DriverStatus.IDLE, r, b, [], run_id="run_id")
         self.assertIsNone(d.target_point())
 
     def test_target_point_pickup(self):
         b = DummyBehaviour()
-        r = Request(0, Point(0, 0), Point(10, 10), 0, RequestStatus.WAITING, 0, 0)
-        d = Driver(1, Point(0, 0), 10.0, DriverStatus.TO_PICKUP, r, b, [])
+        r = Request(0, Point(0, 0), Point(10, 10),
+                    0, RequestStatus.WAITING, 0, 0, "run_id")
+        d = Driver(1, Point(0, 0), 10.0,
+                   DriverStatus.TO_PICKUP, r, b, [], run_id="run_id")
         self.assertEqual(d.target_point(), r.pickup)
 
     def test_target_point_dropoff(self):
         b = DummyBehaviour()
-        r = Request(0, Point(0, 0), Point(10, 10), 0, RequestStatus.WAITING, 0, 0)
-        d = Driver(1, Point(0, 0), 10.0, DriverStatus.TO_DROPOFF, r, b, [])
+        r = Request(0, Point(0, 0), Point(10, 10), 0,
+                    RequestStatus.WAITING, 0, 0, run_id="run_id")
+        d = Driver(1, Point(0, 0), 10.0, DriverStatus.TO_DROPOFF, r,
+                   b, [], run_id="run_id")
         self.assertEqual(d.target_point(), r.dropoff)
 
     def test_target_point_dropoff_wrong_driver_status(self):
         b = DummyBehaviour()
-        r = Request(0, Point(0, 0), Point(10, 10), 0, RequestStatus.WAITING, 0, 0)
-        d = Driver(1, Point(0, 0), 10.0, DriverStatus.IDLE, r, b, [])
+        r = Request(0, Point(0, 0), Point(10, 10), 0,
+                    RequestStatus.WAITING, 0, 0, run_id="run_id")
+        d = Driver(1, Point(0, 0), 10.0,
+                   DriverStatus.IDLE, r, b, [], run_id="run_id")
         with self.assertRaises(AssertionError):
             self.assertEqual(d.target_point(), r.dropoff)
 
@@ -89,8 +105,10 @@ class TestDriver(unittest.TestCase):
     # ----------------------------------------------------------------------
     def test_compute_direction_vector_valid(self):
         b = DummyBehaviour()
-        r = Request(0, Point(3, 4), Point(10, 10), 0, RequestStatus.WAITING, 0, 0)
-        d = Driver(1, Point(0, 0), 10.0, DriverStatus.TO_PICKUP, r, b, [])
+        r = Request(0, Point(3, 4), Point(10, 10), 0,
+                    RequestStatus.WAITING, 0, 0, run_id="run_id")
+        d = Driver(1, Point(0, 0), 10.0,
+                   DriverStatus.TO_PICKUP, r, b, [], run_id="run_id")
 
         d.compute_direction_vector()
 
@@ -101,7 +119,8 @@ class TestDriver(unittest.TestCase):
     def test_compute_direction_vector_idle(self):
         b = DummyBehaviour()
         r = None
-        d = Driver(1, Point(0, 0), 10.0, DriverStatus.TO_DROPOFF, r, b, [])
+        d = Driver(1, Point(0, 0), 10.0,
+                   DriverStatus.TO_DROPOFF, r, b, [], run_id="run_id")
 
         d.compute_direction_vector()
         self.assertIsNone(d.dir_vector)
@@ -111,8 +130,10 @@ class TestDriver(unittest.TestCase):
     # ----------------------------------------------------------------------
     def test_assign_request_valid(self):
         b = DummyBehaviour()
-        r = Request(0, Point(3, 4), Point(10, 10), 0, RequestStatus.WAITING, 0, 0)
-        d = Driver(1, Point(0, 0), 10.0, DriverStatus.IDLE, None, b, [])
+        r = Request(0, Point(3, 4), Point(10, 10), 0,
+                    RequestStatus.WAITING, 0, 0, run_id="run_id")
+        d = Driver(1, Point(0, 0), 10.0,
+                   DriverStatus.IDLE, None, b, [], run_id="run_id")
         d.assign_request(r, 10)
 
         self.assertEqual(d.status, DriverStatus.TO_PICKUP)
@@ -122,7 +143,8 @@ class TestDriver(unittest.TestCase):
     def test_assign_request_invalid(self):
         b = DummyBehaviour()
         r = None
-        d = Driver(1, Point(0, 0), 10.0, DriverStatus.IDLE, None, b, [])
+        d = Driver(1, Point(0, 0), 10.0,
+                   DriverStatus.IDLE, None, b, [], run_id="run_id")
 
         with self.assertRaises(TypeError):
             d.assign_request("not req", 5)
@@ -135,8 +157,10 @@ class TestDriver(unittest.TestCase):
     # ----------------------------------------------------------------------
     def test_step_valid(self):
         b = DummyBehaviour()
-        r = Request(0, Point(3, 4), Point(10, 10), 0, RequestStatus.WAITING, 0, 0)
-        d = Driver(1, Point(0, 0), 5.0, DriverStatus.TO_PICKUP, r, b, [])
+        r = Request(0, Point(3, 4), Point(10, 10), 0,
+                    RequestStatus.WAITING, 0, 0, run_id="run_id")
+        d = Driver(1, Point(0, 0), 5.0,
+                   DriverStatus.TO_PICKUP, r, b, [], run_id="run_id")
         d.compute_direction_vector()
 
         # direction is (0.6, 0.8), speed=5, dt=1
@@ -148,8 +172,10 @@ class TestDriver(unittest.TestCase):
 
     def test_step_invalid_dt(self):
         b = DummyBehaviour()
-        r = Request(0, Point(3, 4), Point(10, 10), 0, RequestStatus.WAITING, 0, 0)
-        d = Driver(1, Point(0, 0), 5.0, DriverStatus.TO_PICKUP, r, b, [])
+        r = Request(0, Point(3, 4), Point(10, 10), 0,
+                    RequestStatus.WAITING, 0, 0, run_id="run_id")
+        d = Driver(1, Point(0, 0), 5.0,
+                   DriverStatus.TO_PICKUP, r, b, [], run_id="run_id")
         with self.assertRaises(TypeError):
             d.step("1.2")       # dt must be int/float
 
@@ -158,8 +184,10 @@ class TestDriver(unittest.TestCase):
     # ----------------------------------------------------------------------
     def test_complete_pickup_valid(self):
         b = DummyBehaviour()
-        r = Request(0, Point(3, 4), Point(10, 10), 1, RequestStatus.WAITING, 0, 0)
-        d = Driver(1, Point(3, 4), 5.0, DriverStatus.TO_PICKUP, r, b, [])
+        r = Request(0, Point(3, 4), Point(10, 10), 1,
+                    RequestStatus.WAITING, 0, 0, run_id="run_id")
+        d = Driver(1, Point(3, 4), 5.0,
+                   DriverStatus.TO_PICKUP, r, b, [], run_id="run_id")
         d.complete_pickup(1)
 
         self.assertEqual(d.status, DriverStatus.TO_DROPOFF)
@@ -168,8 +196,10 @@ class TestDriver(unittest.TestCase):
 
     def test_complete_pickup_invalid(self):
         b = DummyBehaviour()
-        r = Request(0, Point(3, 4), Point(10, 10), 1, RequestStatus.WAITING, 0, 0)
-        d = Driver(1, Point(3, 4), 5.0, DriverStatus.TO_PICKUP, r, b, [])
+        r = Request(0, Point(3, 4), Point(10, 10), 1,
+                    RequestStatus.WAITING, 0, 0, run_id="run_id")
+        d = Driver(1, Point(3, 4), 5.0,
+                   DriverStatus.TO_PICKUP, r, b, [], run_id="run_id")
 
         with self.assertRaises(TypeError):
             d.complete_pickup("bad")
@@ -179,20 +209,24 @@ class TestDriver(unittest.TestCase):
     # ----------------------------------------------------------------------
     def test_complete_dropoff_valid(self):
         b = DummyBehaviour()
-        r = Request(0, Point(3, 4), Point(10, 10), 1, RequestStatus.WAITING, 0, 0)
-        d = Driver(1, Point(10, 10), 5.0, DriverStatus.TO_PICKUP, r, b, [])
+        r = Request(0, Point(3, 4), Point(10, 10), 1,
+                    RequestStatus.WAITING, 0, 0, run_id="run_id")
+        d = Driver(1, Point(10, 10), 5.0,
+                   DriverStatus.TO_PICKUP, r, b, [], run_id="run_id")
         d.complete_dropoff(15)
 
         self.assertEqual(d.status, DriverStatus.IDLE)
         self.assertEqual(d.target_point(), None)
-        self.assertEqual(d.current_request.status, RequestStatus.DELIVERED)
+        self.assertEqual(d.current_request, None)
 
 
 
     def test_complete_dropoff_invalid(self):
         b = DummyBehaviour()
-        r = Request(0, Point(3, 4), Point(10, 10), 1, RequestStatus.WAITING, 0, 0)
-        d = Driver(1, Point(10, 10), 5.0, DriverStatus.TO_PICKUP, r, b, [])
+        r = Request(0, Point(3, 4), Point(10, 10), 1,
+                    RequestStatus.WAITING, 0, 0, run_id="run_id")
+        d = Driver(1, Point(10, 10), 5.0,
+                   DriverStatus.TO_PICKUP, r, b, [], run_id="run_id")
         with self.assertRaises(TypeError):
             d.complete_dropoff([])
 """

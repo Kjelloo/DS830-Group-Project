@@ -69,9 +69,9 @@ class Driver:
             dy = target.y - self.position.y
             magnitude = math.hypot(dx, dy)
             if magnitude > 0:
-                self.dir_vector = (dx / magnitude, dy / magnitude)
+                self.dir_vector = Point(dx / magnitude, dy / magnitude)
             else:
-                self.dir_vector = (0.0, 0.0)
+                self.dir_vector = Point(0.0, 0.0)
         else:
             self.dir_vector = None
             return
