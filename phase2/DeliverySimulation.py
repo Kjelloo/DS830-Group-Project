@@ -67,7 +67,8 @@ class DeliverySimulation:
         self._update_req_wait_times()
 
         # Compute proposed assignments via dispatch_policy
-        proposals = self.dispatch_policy.assign(drivers=self.drivers, requests=self.requests, time=self.time, run_id=self.run_id)
+        proposals = self.dispatch_policy.assign(drivers=self.drivers, requests=self.requests,
+                                                time=self.time, run_id=self.run_id)
 
         # Make offers and get driver responses
         offers = self._create_offers(proposals)

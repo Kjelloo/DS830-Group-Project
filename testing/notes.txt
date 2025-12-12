@@ -1,10 +1,10 @@
 Classes for testing (including their methods):
     [ ] DeliverySimulation
-    [ ] Driver
+    [x] Driver
     [ ] MutationRule
     [ ] Offer
     [x] Point
-    [ ] Request
+    [x] Request
     [ ] RequestGenerator
     [ ] DriverBehaviour
     [ ] EarningsMaxBehaviour
@@ -19,3 +19,4 @@ Classes for testing (including their methods):
 
 Other to-dos:
     [ ] Create load_drivers function
+    [ ] Create generate_drivers function

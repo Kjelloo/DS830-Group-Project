@@ -29,6 +29,9 @@ class Event:
         if not isinstance(self.event_type, EventType):
             raise TypeError("event_type must be an instance of EventType Enum")
 
+        if not isinstance(self.timestamp, int):
+            raise TypeError("timestamp must be int")
+
         if not isinstance(self.event_type, EventType):
             raise TypeError("event_type must be EventType")
 

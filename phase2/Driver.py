@@ -87,7 +87,7 @@ class Driver:
         self.status = DriverStatus.TO_PICKUP
         self.current_request.mark_assigned(self.id, current_time)
         self.compute_direction_vector()
-        # TO-DO: Implement data collection
+        # TODO: Implement data collection
 
     def target_point(self) -> Point | None:
         """
