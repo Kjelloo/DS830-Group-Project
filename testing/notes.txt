@@ -16,7 +16,7 @@ Classes for testing (including their methods):
     [x] GlobalGreedyPolicy
     [ ] NearestNeighborPolicy
 
-    [ ] Event
+    [x] Event
     [ ] EventManager
     [ ] DeliverySimulation
 
