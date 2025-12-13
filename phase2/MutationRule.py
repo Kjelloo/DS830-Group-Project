@@ -2,19 +2,26 @@ from __future__ import annotations
 
 from random import choice
 
-from Driver import Driver
-from Request import RequestStatus
+from phase2.Driver import Driver
+from phase2.Request import RequestStatus
 
-from behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
-from behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
-from behaviour.LazyBehaviour import LazyBehaviour
+from phase2.behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
+from phase2.behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
+from phase2.behaviour.LazyBehaviour import LazyBehaviour
 
-from metrics.EventManager import EventManager
-from metrics.Event import Event, EventType
+from phase2.metrics.EventManager import EventManager
+from phase2.metrics.Event import Event, EventType
 
 
 class MutationRule:
     def __init__(self, n_trips: int, threshold: float, run_id: str) -> None:
+        if not isinstance(n_trips, int):
+            raise TypeError("n_trips must be an integer")
+        if not isinstance(threshold, float):
+            raise TypeError("threshold must be an float")
+        if not isinstance(run_id, str):
+            raise TypeError("run_id must be a string")
+
         self.n_trips = n_trips
         self.threshold = threshold
         self.run_id = run_id

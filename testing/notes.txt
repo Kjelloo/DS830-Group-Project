@@ -5,6 +5,8 @@ Classes for testing (including their methods):
     [x] RequestGenerator
     [x] Offer
     [ ] MutationRule
+  ( [ ] LoadDrivers )
+  ( [ ] LoadRequests )
 
     [ ] DriverBehaviour
     [ ] EarningsMaxBehaviour
@@ -18,7 +20,7 @@ Classes for testing (including their methods):
     [ ] EventManager
     [ ] DeliverySimulation
 
-   ([ ] LazyBehaviour)
+  ( [ ] LazyBehaviour )
 
 Other to-dos:
     [ ] Create load_drivers function
