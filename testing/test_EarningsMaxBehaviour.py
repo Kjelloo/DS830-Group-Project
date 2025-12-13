@@ -3,39 +3,25 @@ from unittest.mock import patch, MagicMock
 
 from phase2.behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
 from phase2.metrics.Event import EventType
-
-
-class FakeRequest:
-    def __init__(self, request_id):
-        self.id = request_id
-
-
-class FakeOffer:
-    def __init__(self, reward, travel_time, request):
-        self.estimated_reward = reward
-        self.estimated_travel_time = travel_time
-        self.request = request
-
-
-class FakeDriver:
-    def __init__(self, driver_id):
-        self.id = driver_id
+from phase2.Request import Request, RequestStatus
+from phase2.Driver import Driver, DriverStatus
+from phase2.Point import Point
+from phase2.Offer import Offer
 
 
 class TestEarningsMaxBehaviour(unittest.TestCase):
 
     def setUp(self):
         self.behaviour = EarningsMaxBehaviour()
-        self.driver = FakeDriver(driver_id=10)
-        self.request = FakeRequest(request_id=99)
+        self.request = Request(1, Point(2,2), Point(3,3), 7, RequestStatus.WAITING,
+                               None, 0, "test_run")
+        self.driver = Driver(1, Point(1,1), 5, DriverStatus.IDLE, None,
+                             self.behaviour, [], "test_run")
+
 
     @patch("phase2.behaviour.EarningsMaxBehaviour.EventManager")
     def test_accepts_offer_when_ratio_meets_threshold(self, mock_event_manager):
-        offer = FakeOffer(
-            reward=10.0,
-            travel_time=5.0, # ratio = 2.0 >= 1.0
-            request=self.request
-        )
+        offer = Offer(self.driver, self.request, 5, 10)
 
         event_manager_instance = MagicMock()
         mock_event_manager.return_value = event_manager_instance
@@ -60,11 +46,7 @@ class TestEarningsMaxBehaviour(unittest.TestCase):
 
     @patch("phase2.behaviour.EarningsMaxBehaviour.EventManager")
     def test_denies_offer_when_ratio_below_threshold(self, mock_event_manager):
-        offer = FakeOffer(
-            reward=4.0,
-            travel_time=5.0, # ratio = 0.8 < 1.0
-            request=self.request
-        )
+        offer = Offer(self.driver, self.request, 10, 5)
 
         event_manager_instance = MagicMock()
         mock_event_manager.return_value = event_manager_instance
@@ -72,7 +54,7 @@ class TestEarningsMaxBehaviour(unittest.TestCase):
         result = self.behaviour.decide(
             driver=self.driver,
             offer=offer,
-            time=12,
+            time=7,
             run_id="test_run"
         )
 

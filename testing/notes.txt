@@ -9,11 +9,11 @@ Classes for testing (including their methods):
   ( [ ] LoadRequests )
 
     [x] DriverBehaviour
-    [ ] EarningsMaxBehaviour
-    [ ] GreedyDistanceBehaviour
+    [x] EarningsMaxBehaviour
+    [x] GreedyDistanceBehaviour
 
-    [ ] DispatchPolicy
-    [ ] GlobalGreedyPolicy
+    [x] DispatchPolicy
+    [x] GlobalGreedyPolicy
     [ ] NearestNeighborPolicy
 
     [ ] Event
