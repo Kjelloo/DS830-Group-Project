@@ -5,7 +5,6 @@ from phase2.Request import Request, RequestStatus
 from phase2.behaviour.DriverBehaviour import DriverBehaviour
 
 
-
 class DummyBehaviour(DriverBehaviour):
     def decide(self):
         pass

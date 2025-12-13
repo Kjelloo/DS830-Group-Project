@@ -166,6 +166,7 @@ class DeliverySimulation:
             if driver.status == DriverStatus.TO_PICKUP and driver.within_one_step_of_target():
                 driver.position = driver.current_request.pickup
                 driver.complete_pickup(self.time)
+                continue
 
             if driver.status == DriverStatus.TO_DROPOFF and driver.within_one_step_of_target():
                 driver.position = driver.current_request.dropoff
