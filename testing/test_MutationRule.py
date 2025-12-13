@@ -1,29 +1,9 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from phase2.MutationRule import MutationRule
-from phase2.metrics.EventManager import EventManager
-from phase2.metrics.Event import Event, EventType
+
 from phase2.Request import RequestStatus
 from phase2.behaviour import EarningsMaxBehaviour, GreedyDistanceBehaviour, LazyBehaviour
 from phase2.MutationRule import MutationRule
-from phase2.Request import Request
-
-
-
-"""
-- Bestem input
-- Regn det forventede output ud
-- sammenlign det faktiske output med det forventede output.
-
-Skal gøres for:
-[x] instantiation, herunder typechecking
-[x] str
-[x] repr
-- maybe_mutate
-- mutate_driver
-"""
-
-
 
 
 class TestMutationRule(unittest.TestCase):

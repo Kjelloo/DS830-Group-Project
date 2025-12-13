@@ -4,11 +4,11 @@ Classes for testing (including their methods):
     [x] Request
     [x] RequestGenerator
     [x] Offer
-    [ ] MutationRule
+    [x] MutationRule
   ( [ ] LoadDrivers )
   ( [ ] LoadRequests )
 
-    [ ] DriverBehaviour
+    [x] DriverBehaviour
     [ ] EarningsMaxBehaviour
     [ ] GreedyDistanceBehaviour
 
