@@ -16,7 +16,6 @@ class GUIAdapter:
     """
     Adapter class to interface between the old GUI and the DeliverySimulation.
     """
-
     def __init__(self,
                  run_id: str,
                  delivery_simulation: DeliverySimulation):
@@ -143,70 +142,6 @@ class GUIAdapter:
                 'dy': float(r.dropoff.y),
                 'status': r.status.name.lower()
             })
-
-    def _dict_to_driver(self, driver: dict) -> Driver:
-        if isinstance(driver, Driver):
-            return driver
-
-        x = float(driver.get('x', driver.get('px', 0.0)))
-        y = float(driver.get('y', driver.get('py', 0.0)))
-
-        drv_id = int(driver.get('id', len(self.simulation.drivers) + 1))
-        speed = float(driver.get('speed', 1.0))
-
-        behaviour = choice([EarningsMaxBehaviour(), GreedyDistanceBehaviour()])
-
-        status = driver.get('status', 'idle')
-
-        try:
-            status_enum = DriverStatus[status.upper()]
-        except Exception:
-            status_enum = DriverStatus.IDLE
-
-        return Driver(id=drv_id,
-                      position=Point(x, y),
-                      speed=speed,
-                      behaviour=behaviour,
-                      status=status_enum,
-                      current_request=None,
-                      history=[],
-                      run_id=self.run_id)
-
-    def _dict_to_request(self, request: dict) -> Request:
-        if isinstance(request, Request):
-            return request
-
-        req_id = int(request.get('id', len(self.simulation.requests) + 1))
-        px = float(request.get('px', request.get('pickup_x', 0.0)))
-        py = float(request.get('py', request.get('pickup_y', 0.0)))
-        dx = float(request.get('dx', request.get('dropoff_x', 0.0)))
-        dy = float(request.get('dy', request.get('dropoff_y', 0.0)))
-        t = int(request.get('t', request.get('creation_time', 0)))
-
-        status_str = str(request.get('status', 'waiting')).lower()
-
-        status = RequestStatus.WAITING
-
-        match status_str:
-            case 'waiting':
-                status = RequestStatus.WAITING
-            case 'assigned':
-                status = RequestStatus.ASSIGNED
-            case 'picked':
-                status = RequestStatus.PICKED
-            case 'delivered':
-                status = RequestStatus.DELIVERED
-            case 'expired':
-                status = RequestStatus.EXPIRED
-
-        return Request(id=req_id,
-                       pickup=Point(px, py),
-                       dropoff=Point(dx, dy),
-                       creation_time=t,
-                       status=status,
-                       assigned_driver=None,
-                       wait_time=0,
-                       run_id=self.run_id)
 
     def init_state(self,
                    drivers: list[dict],
@@ -380,3 +315,67 @@ class GUIAdapter:
             'drivers': drivers_data,
             'requests': requests_data
         }
+
+    def _dict_to_driver(self, driver: dict) -> Driver:
+        if isinstance(driver, Driver):
+            return driver
+
+        x = float(driver.get('x', driver.get('px', 0.0)))
+        y = float(driver.get('y', driver.get('py', 0.0)))
+
+        drv_id = int(driver.get('id', len(self.simulation.drivers) + 1))
+        speed = float(driver.get('speed', 1.0))
+
+        behaviour = choice([EarningsMaxBehaviour(), GreedyDistanceBehaviour()])
+
+        status = driver.get('status', 'idle')
+
+        try:
+            status_enum = DriverStatus[status.upper()]
+        except Exception:
+            status_enum = DriverStatus.IDLE
+
+        return Driver(id=drv_id,
+                      position=Point(x, y),
+                      speed=speed,
+                      behaviour=behaviour,
+                      status=status_enum,
+                      current_request=None,
+                      history=[],
+                      run_id=self.run_id)
+
+    def _dict_to_request(self, request: dict) -> Request:
+        if isinstance(request, Request):
+            return request
+
+        req_id = int(request.get('id', len(self.simulation.requests) + 1))
+        px = float(request.get('px', request.get('pickup_x', 0.0)))
+        py = float(request.get('py', request.get('pickup_y', 0.0)))
+        dx = float(request.get('dx', request.get('dropoff_x', 0.0)))
+        dy = float(request.get('dy', request.get('dropoff_y', 0.0)))
+        t = int(request.get('t', request.get('creation_time', 0)))
+
+        status_str = str(request.get('status', 'waiting')).lower()
+
+        status = RequestStatus.WAITING
+
+        match status_str:
+            case 'waiting':
+                status = RequestStatus.WAITING
+            case 'assigned':
+                status = RequestStatus.ASSIGNED
+            case 'picked':
+                status = RequestStatus.PICKED
+            case 'delivered':
+                status = RequestStatus.DELIVERED
+            case 'expired':
+                status = RequestStatus.EXPIRED
+
+        return Request(id=req_id,
+                       pickup=Point(px, py),
+                       dropoff=Point(dx, dy),
+                       creation_time=t,
+                       status=status,
+                       assigned_driver=None,
+                       wait_time=0,
+                       run_id=self.run_id)
