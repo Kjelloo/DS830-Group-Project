@@ -1,21 +1,24 @@
 Classes for testing (including their methods):
-    [ ] DeliverySimulation
     [x] Driver
-    [ ] MutationRule
-    [ ] Offer
     [x] Point
     [x] Request
-    [ ] RequestGenerator
+    [x] RequestGenerator
+    [ ] Offer
+    [ ] MutationRule
+
     [ ] DriverBehaviour
     [ ] EarningsMaxBehaviour
     [ ] GreedyDistanceBehaviour
-    [ ] LazyBehaviour
+
     [ ] DispatchPolicy
     [ ] GlobalGreedyPolicy
     [ ] NearestNeighborPolicy
+
     [ ] Event
     [ ] EventManager
+    [ ] DeliverySimulation
 
+   ([ ] LazyBehaviour)
 
 Other to-dos:
     [ ] Create load_drivers function
