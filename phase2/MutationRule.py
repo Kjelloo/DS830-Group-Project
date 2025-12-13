@@ -2,15 +2,15 @@ from __future__ import annotations
 
 from random import choice
 
-from Driver import Driver
-from Request import RequestStatus
+from phase2.Driver import Driver
+from phase2.Request import RequestStatus
 
-from behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
-from behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
-from behaviour.LazyBehaviour import LazyBehaviour
+from phase2.behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
+from phase2.behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
+from phase2.behaviour.LazyBehaviour import LazyBehaviour
 
-from metrics.EventManager import EventManager
-from metrics.Event import Event, EventType
+from phase2.metrics.EventManager import EventManager
+from phase2.metrics.Event import Event, EventType
 
 
 class MutationRule:
@@ -58,6 +58,7 @@ class MutationRule:
             candidates = behaviour_classes
 
         new_behaviour_cls = choice(candidates)
-        driver.behaviour = new_behaviour_cls
+        # instantiate the new behaviour class (dont assign the class object)
+        driver.behaviour = new_behaviour_cls()
 
         eventManager.add_event(Event(time, EventType.BEHAVIOUR_CHANGED, driver.id, None, None))

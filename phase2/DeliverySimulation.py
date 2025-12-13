@@ -2,20 +2,22 @@ from __future__ import annotations
 
 import datetime
 
-from Point import Point
-from Driver import Driver, DriverStatus
-from MutationRule import MutationRule
-from Request import Request, RequestStatus
-from dispatch.DispatchPolicy import DispatchPolicy
-from RequestGenerator import RequestGenerator
-from Offer import Offer
-from behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
-from behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
-from dispatch.GlobalGreedyPolicy import GlobalGreedyPolicy
+from phase2.Point import Point
+from phase2.Driver import Driver, DriverStatus
+from phase2.MutationRule import MutationRule
+from phase2.Request import Request, RequestStatus
+from phase2.dispatch.DispatchPolicy import DispatchPolicy
+from phase2.RequestGenerator import RequestGenerator
+from phase2.Offer import Offer
+from phase2.behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
+from phase2.behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
+from phase2.dispatch.GlobalGreedyPolicy import GlobalGreedyPolicy
 
 class DeliverySimulation:
     def __init__(self,
                  time: int,
+                 width: int,
+                 height: int,
                  drivers: list[Driver],
                  requests: list[Request],
                  request_generator: RequestGenerator,
@@ -25,6 +27,8 @@ class DeliverySimulation:
                  statistics: dict,
                  run_id: str) -> None:
         self.time = time
+        self.width = width
+        self.height = height
         self.drivers = drivers
         self.requests = requests
         self.dispatch_policy = dispatch_policy
@@ -94,7 +98,22 @@ class DeliverySimulation:
 
         Used by the GUI adapter.
         """
-        pass
+        driver_states = [{'id': driver.id,
+                          'position': (driver.position.x, driver.position.y),
+                          'status': driver.status.name} for driver in self.drivers]
+
+        pickup_positions = [(req.pickup.x, req.pickup.y) for req in self.requests if req.status in {RequestStatus.WAITING, RequestStatus.ASSIGNED}]
+
+        dropoff_positions = [(req.dropoff.x, req.dropoff.y) for req in self.requests if req.status == RequestStatus.PICKED]
+
+        snapshot = {
+            'drivers': driver_states,
+            'pickups': pickup_positions,
+            'dropoffs': dropoff_positions,
+            'statistics': self.statistics
+        }
+
+        return snapshot
 
     def _update_req_wait_times(self) -> None:
         """
