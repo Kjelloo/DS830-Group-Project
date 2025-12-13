@@ -3,7 +3,7 @@ Classes for testing (including their methods):
     [x] Point
     [x] Request
     [x] RequestGenerator
-    [ ] Offer
+    [x] Offer
     [ ] MutationRule
 
     [ ] DriverBehaviour
