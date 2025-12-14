@@ -11,7 +11,7 @@ class DriverGenerator:
     def __init__(self, run_id: str) -> None:
         self.run_id = run_id
 
-    def generate(self, amount: int, width: int, height: int, speed: float, start_id: int,) -> list[Driver]:
+    def generate(self, amount: int, width: int, height: int, speed: float, start_id: int) -> list[Driver]:
         """
         Generate a list of Driver objects with random positions within the map.
         """

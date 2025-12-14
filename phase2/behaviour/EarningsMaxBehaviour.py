@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from phase2.metrics.EventManager import EventManager
-from phase2.metrics.Event import Event, EventType
-from phase2.behaviour.DriverBehaviour import DriverBehaviour
 from phase2.Driver import Driver
 from phase2.Offer import Offer
+from phase2.behaviour.DriverBehaviour import DriverBehaviour
+from phase2.metrics.Event import Event, EventType
+from phase2.metrics.EventManager import EventManager
 
 
 class EarningsMaxBehaviour(DriverBehaviour):

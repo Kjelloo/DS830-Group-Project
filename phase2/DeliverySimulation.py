@@ -2,16 +2,19 @@ from __future__ import annotations
 
 import datetime
 
-from phase2.Point import Point
 from phase2.Driver import Driver, DriverStatus
 from phase2.MutationRule import MutationRule
-from phase2.Request import Request, RequestStatus
-from phase2.dispatch.DispatchPolicy import DispatchPolicy
-from phase2.RequestGenerator import RequestGenerator
 from phase2.Offer import Offer
-from phase2.behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
+from phase2.Point import Point
+from phase2.Request import Request, RequestStatus
+from phase2.RequestGenerator import RequestGenerator
 from phase2.behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
+from phase2.behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
+from phase2.dispatch.DispatchPolicy import DispatchPolicy
 from phase2.dispatch.GlobalGreedyPolicy import GlobalGreedyPolicy
+from phase2.metrics.Event import Event, EventType
+from phase2.metrics.EventManager import EventManager
+
 
 class DeliverySimulation:
     def __init__(self,
@@ -35,11 +38,11 @@ class DeliverySimulation:
         self.mutation_rule = mutation_rule
         self.timeout = timeout
         self.statistics = statistics
-
         self.request_generator = request_generator
 
         # Unique run identifier used for the EventManager
         self.run_id = run_id
+        self.event_manager = EventManager(run_id)
 
     def __str__(self):
         return (f"DeliverySimulation(time={self.time}, "
@@ -71,8 +74,8 @@ class DeliverySimulation:
         self._update_req_wait_times()
 
         # Compute proposed assignments via dispatch_policy
-        proposals = self.dispatch_policy.assign(drivers=self.drivers, requests=self.requests,
-                                                time=self.time, run_id=self.run_id)
+        proposals = self.dispatch_policy.assign(drivers=self.drivers, requests=self.requests, time=self.time,
+                                                run_id=self.run_id)
 
         # Make offers and get driver responses
         offers = self._create_offers(proposals)
@@ -103,9 +106,11 @@ class DeliverySimulation:
                           'position': (driver.position.x, driver.position.y),
                           'status': driver.status.name} for driver in self.drivers]
 
-        pickup_positions = [(req.pickup.x, req.pickup.y) for req in self.requests if req.status in {RequestStatus.WAITING, RequestStatus.ASSIGNED}]
+        pickup_positions = [(req.pickup.x, req.pickup.y) for req in self.requests if
+                            req.status in {RequestStatus.WAITING, RequestStatus.ASSIGNED}]
 
-        dropoff_positions = [(req.dropoff.x, req.dropoff.y) for req in self.requests if req.status == RequestStatus.PICKED]
+        dropoff_positions = [(req.dropoff.x, req.dropoff.y) for req in self.requests if
+                             req.status == RequestStatus.PICKED]
 
         snapshot = {
             'drivers': driver_states,
@@ -130,19 +135,23 @@ class DeliverySimulation:
             req.wait_time += 1
 
             # if request has not reached timeout yet, continue
-            if self.time - req.creation_time < self.timeout:
+            if req.wait_time < self.timeout:
                 continue
 
             # Handle expiration different if request is assigned to a driver or not
             if req.assigned_driver is not None:
                 # Find the assigned driver and expire the current request
                 assigned_driver = next((driver for driver in self.drivers if driver.id == req.assigned_driver), None)
+
                 if assigned_driver is not None:
+                    self.statistics['expired'] += 1
                     assigned_driver.expire_current_request(self.time)
                 else:
                     # This should not happen, but just in case
+                    self.statistics['expired'] += 1
                     req.mark_expired(self.time)
             else:
+                self.statistics['expired'] += 1
                 req.mark_expired(self.time)
 
     @staticmethod
@@ -164,7 +173,8 @@ class DeliverySimulation:
         """
         accepted = []
         for offer in offers:
-            accepted.append(offer.driver.behaviour.decide(driver=offer.driver, offer=offer, time=self.time, run_id=self.run_id))
+            accepted.append(
+                offer.driver.behaviour.decide(driver=offer.driver, offer=offer, time=self.time, run_id=self.run_id))
 
         if len(accepted) > 0:
             # Sort offers by estimated travel time in descending order
@@ -177,18 +187,29 @@ class DeliverySimulation:
         """
         Move drivers and handle pickup/dropoff events.
         """
-
         for driver in drivers:
+            # Handle idle drivers
             if driver.status == DriverStatus.IDLE:
+                driver.idle_time += 1  # TODO: This should maybe be in relation to dt instead of a fixed increment
+                self.event_manager.add_event(Event(timestamp=self.time,
+                                                   event_type=EventType.DRIVER_IDLE,
+                                                   driver_id=driver.id,
+                                                   request_id=None,
+                                                   wait_time=driver.idle_time))
                 continue
 
+            driver.idle_time = 0  # Reset idle time if driver is not idle
+
+            # Handle pickups
             if driver.status == DriverStatus.TO_PICKUP and driver.within_one_step_of_target():
                 driver.position = driver.current_request.pickup
                 driver.complete_pickup(self.time)
-                continue
 
+            # Handle dropoffs
             if driver.status == DriverStatus.TO_DROPOFF and driver.within_one_step_of_target():
                 driver.position = driver.current_request.dropoff
+                self.statistics['served'] += 1
+                self.statistics['served_waits'].append(driver.current_request.wait_time)
                 driver.complete_dropoff(self.time)
                 continue
 

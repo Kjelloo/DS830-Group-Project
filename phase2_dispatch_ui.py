@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Optional, Dict, Callable, Any
 from gui._engine import run_app
-from phase2.RequestGenerator import RequestGenerator
 
 
 def main(backend: Optional[Dict[str, Callable[..., Any]]] = None) -> None:
@@ -13,16 +12,17 @@ def main(backend: Optional[Dict[str, Callable[..., Any]]] = None) -> None:
 
 
 if __name__ == "__main__":
-
-    from adapter.GUIAdapter import GUIAdapter
     import datetime
+    from phase2.adapter.GUIAdapter import GUIAdapter
     from phase2.DeliverySimulation import DeliverySimulation
     from phase2.Driver import Driver
     from phase2.Request import Request
     from phase2.MutationRule import MutationRule
     from phase2.dispatch.GlobalGreedyPolicy import GlobalGreedyPolicy
+    from phase2.RequestGenerator import RequestGenerator
+    from phase2.metrics.MetricsManager import MetricsManager
 
-    run_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    run_id = datetime.datetime.now().strftime("%H%M%S_%d%m%y")
 
     simulation = DeliverySimulation(
         time=0,
@@ -54,3 +54,7 @@ if __name__ == "__main__":
     }
 
     main(_backend)
+
+    # After closing generate plots from metrics
+    metrics_manager = MetricsManager(run_id=simulation.run_id)
+    metrics_manager.generate_plots(save=True)

@@ -3,8 +3,9 @@ from __future__ import annotations
 from enum import Enum
 
 from phase2.Point import Point
-from phase2.metrics.EventManager import EventManager
 from phase2.metrics.Event import Event, EventType
+from phase2.metrics.EventManager import EventManager
+
 
 
 class RequestStatus(Enum):
