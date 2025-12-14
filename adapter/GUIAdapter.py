@@ -10,6 +10,9 @@ from phase2.Request import Request, RequestStatus
 from phase2.RequestGenerator import RequestGenerator
 from phase2.behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
 from phase2.behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
+from phase2.metrics.EventManager import EventManager
+
+import datetime
 
 
 class GUIAdapter:
@@ -143,6 +146,25 @@ class GUIAdapter:
                 'status': r.status.name.lower()
             })
 
+    def _apply_new_run_id(self, new_run_id: str) -> None:
+        """
+        Small helper to push a new run_id everywhere. Keeps code readable.
+        """
+        self.run_id = new_run_id
+        self.simulation.run_id = new_run_id
+        # Recreate EventManager so new events go into a fresh CSV
+        self.simulation.event_manager = EventManager(new_run_id)
+        # Update generators and rules
+        if self.simulation.request_generator is not None:
+            self.simulation.request_generator.run_id = new_run_id
+        if self.simulation.mutation_rule is not None:
+            self.simulation.mutation_rule.run_id = new_run_id
+        # Update existing domain objects
+        for d in self.simulation.drivers:
+            d.run_id = new_run_id
+        for r in self.simulation.requests:
+            r.run_id = new_run_id
+
     def init_state(self,
                    drivers: list[dict],
                    requests: list[dict],
@@ -152,10 +174,19 @@ class GUIAdapter:
                    height: int = 30) -> dict:
         """
         Initialize the DeliverySimulation and return the UI state dict.
+
+        Also, each time init is called, we create a fresh run_id so metrics
+        are written to a new CSV file.
         """
+        # New run id on every init
+        new_run_id = datetime.datetime.now().strftime("%H%M%S_%d%m%y")
+        self._apply_new_run_id(new_run_id)
+
+        # Convert UI dicts to domain objects
         drv_objs: list[Driver] = [self._dict_to_driver(d) for d in drivers]
         req_objs: list[Request] = [self._dict_to_request(r) for r in requests]
 
+        # Put into simulation
         self.simulation.drivers = drv_objs
         self.simulation.requests = req_objs
         self.simulation.time = 0
@@ -164,32 +195,12 @@ class GUIAdapter:
         self.simulation.request_generator = RequestGenerator(rate=req_rate, width=width, height=height,
                                                              start_id=(len(req_objs) + 1), run_id=self.run_id)
         self.simulation.timeout = timeout
-        self.simulation.run_id = self.run_id
         self.simulation.statistics = {"served": 0, "expired": 0, "served_waits": []}
 
-        # convert to dict format which is used by the UI
+        # Build UI-shaped lists
         ui_drivers = []
         for d in self.simulation.drivers:
-            dir_vector = d.dir_vector if d.dir_vector is not None else (0.0, 0.0)
-
-            target_pt = d.target_point()
-
-            tx = float(target_pt.x) if target_pt is not None else 0.0
-            ty = float(target_pt.y) if target_pt is not None else 0.0
-
-            target_id = d.current_request.id if getattr(d, 'current_request', None) is not None else None
-
-            ui_drivers.append({
-                'id': d.id,
-                'x': float(d.position.x),
-                'y': float(d.position.y),
-                'status': d.status.name.lower(),
-                'vx': float(dir_vector[0]),
-                'vy': float(dir_vector[1]),
-                'tx': tx,
-                'ty': ty,
-                'target_id': target_id
-            })
+            ui_drivers.append(self._driver_to_dict(d))
 
         ui_pending = []
         for r in self.simulation.requests:
@@ -379,3 +390,24 @@ class GUIAdapter:
                        assigned_driver=None,
                        wait_time=0,
                        run_id=self.run_id)
+
+    def _driver_to_dict(self, d: Driver) -> dict:
+        dir_vector = d.dir_vector if d.dir_vector is not None else (0.0, 0.0)
+        target_pt = d.target_point()
+
+        tx = float(target_pt.x) if target_pt is not None else 0.0
+        ty = float(target_pt.y) if target_pt is not None else 0.0
+
+        target_id = d.current_request.id if getattr(d, 'current_request', None) is not None else None
+
+        return {
+            'id': d.id,
+            'x': float(d.position.x),
+            'y': float(d.position.y),
+            'status': d.status.name.lower(),
+            'vx': float(dir_vector[0]),
+            'vy': float(dir_vector[1]),
+            'tx': tx,
+            'ty': ty,
+            'target_id': target_id
+        }

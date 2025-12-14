@@ -12,6 +12,9 @@ from phase2.Offer import Offer
 from phase2.behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
 from phase2.behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
 from phase2.dispatch.GlobalGreedyPolicy import GlobalGreedyPolicy
+from phase2.metrics.Event import Event, EventType
+from phase2.metrics.EventManager import EventManager
+
 
 class DeliverySimulation:
     def __init__(self,
@@ -35,11 +38,11 @@ class DeliverySimulation:
         self.mutation_rule = mutation_rule
         self.timeout = timeout
         self.statistics = statistics
-
         self.request_generator = request_generator
 
         # Unique run identifier used for the EventManager
         self.run_id = run_id
+        self.event_manager = EventManager(run_id)
 
     def __str__(self):
         return (f"DeliverySimulation(time={self.time}, "
@@ -129,7 +132,7 @@ class DeliverySimulation:
             req.wait_time += 1
 
             # if request has not reached timeout yet, continue
-            if self.time - req.creation_time < self.timeout:
+            if req.wait_time < self.timeout:
                 continue
 
             # Handle expiration different if request is assigned to a driver or not
@@ -178,13 +181,24 @@ class DeliverySimulation:
         """
 
         for driver in drivers:
+            # Handle idle drivers
             if driver.status == DriverStatus.IDLE:
+                driver.idle_time += 1  # TODO: This should maybe be in relation to dt instead of a fixed increment
+                self.event_manager.add_event(Event(timestamp=self.time,
+                                                   event_type=EventType.DRIVER_IDLE,
+                                                   driver_id=driver.id,
+                                                   request_id=None,
+                                                   wait_time=driver.idle_time))
                 continue
 
+            driver.idle_time = 0 # Reset idle time if driver is not idle
+
+            # Handle pickups
             if driver.status == DriverStatus.TO_PICKUP and driver.within_one_step_of_target():
                 driver.position = driver.current_request.pickup
                 driver.complete_pickup(self.time)
 
+            # Handle dropoffs
             if driver.status == DriverStatus.TO_DROPOFF and driver.within_one_step_of_target():
                 driver.position = driver.current_request.dropoff
                 driver.complete_dropoff(self.time)

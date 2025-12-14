@@ -22,7 +22,7 @@ if __name__ == "__main__":
     from phase2.MutationRule import MutationRule
     from phase2.dispatch.GlobalGreedyPolicy import GlobalGreedyPolicy
 
-    run_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    run_id = datetime.datetime.now().strftime("%H%M%S_%d%m%y")
 
     simulation = DeliverySimulation(
         time=0,
