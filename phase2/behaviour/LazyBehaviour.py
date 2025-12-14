@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from phase2.behaviour.DriverBehaviour import DriverBehaviour
 from phase2.Driver import Driver
 from phase2.Offer import Offer
+from phase2.behaviour.DriverBehaviour import DriverBehaviour
 
 
 class LazyBehaviour(DriverBehaviour):

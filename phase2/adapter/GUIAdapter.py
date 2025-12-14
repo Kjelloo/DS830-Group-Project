@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from random import choice
 
 from phase2.DeliverySimulation import DeliverySimulation
@@ -10,16 +11,15 @@ from phase2.Request import Request, RequestStatus
 from phase2.RequestGenerator import RequestGenerator
 from phase2.behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
 from phase2.behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
-from phase2.metrics.EventManager import EventManager
 from phase2.metrics.Event import Event, EventType
-
-import datetime
+from phase2.metrics.EventManager import EventManager
 
 
 class GUIAdapter:
     """
     Adapter class to interface between the old GUI and the DeliverySimulation.
     """
+
     def __init__(self,
                  run_id: str,
                  delivery_simulation: DeliverySimulation):

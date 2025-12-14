@@ -4,7 +4,8 @@ from phase2.dispatch.DispatchPolicy import DispatchPolicy
 
 
 class GlobalGreedyPolicy(DispatchPolicy):
-    def assign(self, drivers: list[Driver], requests: list[Request], time: int, run_id: str) -> list[tuple[Driver, Request]]:
+    def assign(self, drivers: list[Driver], requests: list[Request], time: int, run_id: str) -> list[
+        tuple[Driver, Request]]:
         """
         build all (idle driver, waiting request) pairs, sort by distance, and match greedily while avoiding reuse of drivers and requests
         """

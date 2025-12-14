@@ -4,13 +4,10 @@ from random import choice
 
 from phase2.Driver import Driver
 from phase2.Request import RequestStatus
-
 from phase2.behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
 from phase2.behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
-from phase2.behaviour.LazyBehaviour import LazyBehaviour
-
-from phase2.metrics.EventManager import EventManager
 from phase2.metrics.Event import Event, EventType
+from phase2.metrics.EventManager import EventManager
 
 
 class MutationRule:
@@ -63,4 +60,5 @@ class MutationRule:
         driver.history.clear()  # Reset history after mutation
 
         # Log change with behaviour name for downstream metrics
-        eventManager.add_event(Event(time, EventType.BEHAVIOUR_CHANGED, driver.id, None, None, behaviour_name=type(driver.behaviour).__name__))
+        eventManager.add_event(Event(time, EventType.BEHAVIOUR_CHANGED, driver.id, None, None,
+                                     behaviour_name=type(driver.behaviour).__name__))

@@ -16,6 +16,7 @@ class EventType(Enum):
     BEHAVIOUR_CHANGED = 8
     DRIVER_IDLE = 9
 
+
 @dataclass
 class Event:
     timestamp: int

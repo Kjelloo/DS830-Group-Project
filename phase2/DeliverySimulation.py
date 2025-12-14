@@ -2,15 +2,15 @@ from __future__ import annotations
 
 import datetime
 
-from phase2.Point import Point
 from phase2.Driver import Driver, DriverStatus
 from phase2.MutationRule import MutationRule
-from phase2.Request import Request, RequestStatus
-from phase2.dispatch.DispatchPolicy import DispatchPolicy
-from phase2.RequestGenerator import RequestGenerator
 from phase2.Offer import Offer
-from phase2.behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
+from phase2.Point import Point
+from phase2.Request import Request, RequestStatus
+from phase2.RequestGenerator import RequestGenerator
 from phase2.behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
+from phase2.behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
+from phase2.dispatch.DispatchPolicy import DispatchPolicy
 from phase2.dispatch.GlobalGreedyPolicy import GlobalGreedyPolicy
 from phase2.metrics.Event import Event, EventType
 from phase2.metrics.EventManager import EventManager
@@ -74,7 +74,8 @@ class DeliverySimulation:
         self._update_req_wait_times()
 
         # Compute proposed assignments via dispatch_policy
-        proposals = self.dispatch_policy.assign(drivers=self.drivers, requests=self.requests, time=self.time, run_id=self.run_id)
+        proposals = self.dispatch_policy.assign(drivers=self.drivers, requests=self.requests, time=self.time,
+                                                run_id=self.run_id)
 
         # Make offers and get driver responses
         offers = self._create_offers(proposals)
@@ -105,9 +106,11 @@ class DeliverySimulation:
                           'position': (driver.position.x, driver.position.y),
                           'status': driver.status.name} for driver in self.drivers]
 
-        pickup_positions = [(req.pickup.x, req.pickup.y) for req in self.requests if req.status in {RequestStatus.WAITING, RequestStatus.ASSIGNED}]
+        pickup_positions = [(req.pickup.x, req.pickup.y) for req in self.requests if
+                            req.status in {RequestStatus.WAITING, RequestStatus.ASSIGNED}]
 
-        dropoff_positions = [(req.dropoff.x, req.dropoff.y) for req in self.requests if req.status == RequestStatus.PICKED]
+        dropoff_positions = [(req.dropoff.x, req.dropoff.y) for req in self.requests if
+                             req.status == RequestStatus.PICKED]
 
         snapshot = {
             'drivers': driver_states,
@@ -170,7 +173,8 @@ class DeliverySimulation:
         """
         accepted = []
         for offer in offers:
-            accepted.append(offer.driver.behaviour.decide(driver=offer.driver, offer=offer, time=self.time, run_id=self.run_id))
+            accepted.append(
+                offer.driver.behaviour.decide(driver=offer.driver, offer=offer, time=self.time, run_id=self.run_id))
 
         if len(accepted) > 0:
             # Sort offers by estimated travel time in descending order
@@ -194,7 +198,7 @@ class DeliverySimulation:
                                                    wait_time=driver.idle_time))
                 continue
 
-            driver.idle_time = 0 # Reset idle time if driver is not idle
+            driver.idle_time = 0  # Reset idle time if driver is not idle
 
             # Handle pickups
             if driver.status == DriverStatus.TO_PICKUP and driver.within_one_step_of_target():

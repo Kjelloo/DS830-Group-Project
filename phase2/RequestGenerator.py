@@ -4,8 +4,8 @@ import random
 
 from phase2.Point import Point
 from phase2.Request import Request, RequestStatus
-from phase2.metrics.EventManager import EventManager
 from phase2.metrics.Event import Event, EventType
+from phase2.metrics.EventManager import EventManager
 
 
 class RequestGenerator:
