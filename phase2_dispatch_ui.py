@@ -30,7 +30,7 @@ if __name__ == "__main__":
         height=30,
         drivers=list[Driver](),
         requests=list[Request](),
-        mutation_rule=MutationRule(n_trips=10, threshold=0.8, run_id=run_id),
+        mutation_rule=MutationRule(n_trips=5, threshold=0.7, run_id=run_id),
         dispatch_policy=GlobalGreedyPolicy(),
         run_id=run_id,
         timeout=30,
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         "generate_requests": adapter.generate_requests,
         "init_state": adapter.init_state,
         "simulate_step": adapter.simulate_step,
-        "get_plot_data": adapter.get_plot_data # Not sure what this is used for?
+        "get_plot_data": adapter.get_plot_data
     }
 
     main(_backend)

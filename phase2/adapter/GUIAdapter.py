@@ -11,6 +11,7 @@ from phase2.RequestGenerator import RequestGenerator
 from phase2.behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
 from phase2.behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
 from phase2.metrics.EventManager import EventManager
+from phase2.metrics.Event import Event, EventType
 
 import datetime
 
@@ -224,6 +225,24 @@ class GUIAdapter:
             'width': width,
             'height': height,
         }
+
+        # log initial behaviour for each driver so early deliveries are attributed correctly
+        # this is only necessary due to the need of the gui adapter to re-create the simulation
+        # we have to do this workaround
+        em = EventManager(self.run_id)
+        for d in self.simulation.drivers:
+            try:
+                behaviour_name = type(d.behaviour).__name__
+            except Exception:
+                behaviour_name = 'Unknown'
+            # Log at time 0 (or current simulation time if preferred)
+            em.add_event(Event(timestamp=0,
+                               event_type=EventType.BEHAVIOUR_CHANGED,
+                               driver_id=d.id,
+                               request_id=None,
+                               wait_time=None,
+                               behaviour_name=behaviour_name))
+
         return state
 
     def simulate_step(self, state: dict) -> tuple[dict, dict]:

@@ -50,7 +50,8 @@ class MutationRule:
         """
         eventManager = EventManager(self.run_id)
 
-        behaviour_classes = [EarningsMaxBehaviour, GreedyDistanceBehaviour, LazyBehaviour]
+        # TODO: Add LazyBehaviour once implemented
+        behaviour_classes = [EarningsMaxBehaviour, GreedyDistanceBehaviour]
         current_type = type(driver.behaviour)
         candidates = [b for b in behaviour_classes if b is not current_type]
 
@@ -58,7 +59,8 @@ class MutationRule:
             candidates = behaviour_classes
 
         new_behaviour_cls = choice(candidates)
-        # instantiate the new behaviour class (dont assign the class object)
         driver.behaviour = new_behaviour_cls()
+        driver.history.clear()  # Reset history after mutation
 
-        eventManager.add_event(Event(time, EventType.BEHAVIOUR_CHANGED, driver.id, None, None))
+        # Log change with behaviour name for downstream metrics
+        eventManager.add_event(Event(time, EventType.BEHAVIOUR_CHANGED, driver.id, None, None, behaviour_name=type(driver.behaviour).__name__))

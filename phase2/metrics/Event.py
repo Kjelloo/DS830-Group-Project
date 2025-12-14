@@ -23,16 +23,16 @@ class Event:
     driver_id: Optional[int]
     request_id: Optional[int]
     wait_time: Optional[int]
+    behaviour_name: Optional[str] = None
 
     # Validation upon initialization
     def __post_init__(self):
         if not isinstance(self.event_type, EventType):
             raise TypeError("event_type must be an instance of EventType Enum")
 
-        if not isinstance(self.event_type, EventType):
-            raise TypeError("event_type must be EventType")
-
         for attr in ["driver_id", "request_id", "wait_time"]:
             value = getattr(self, attr)
             if value is not None and not isinstance(value, int):
                 raise TypeError(f"{attr} must be int or None")
+        if self.behaviour_name is not None and not isinstance(self.behaviour_name, str):
+            raise TypeError("behaviour_name must be str or None")

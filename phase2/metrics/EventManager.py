@@ -24,7 +24,8 @@ class EventManager:
                         "event_type, "
                         "driver_id, "
                         "request_id, "
-                        "wait_time\n")
+                        "wait_time, "
+                        "behaviour_name\n")
 
     def add_event(self, event: Event):
         # Append the event to csv file
@@ -33,32 +34,42 @@ class EventManager:
                     "{event_type}, "
                     "{driver_id}, "
                     "{request_id}, "
-                    "{wait_time}"
+                    "{wait_time}, "
+                    "{behaviour_name}"
                     .format(timestamp=event.timestamp,
                             event_type=event.event_type.value,
                             driver_id=event.driver_id,
                             request_id=event.request_id,
-                            wait_time=event.wait_time) + '\n')
+                            wait_time=event.wait_time,
+                            behaviour_name=event.behaviour_name if event.behaviour_name is not None else 'None') + '\n')
 
     def get_events(self):
         with open(self.filepath, 'r') as f:
-            lines = f.readlines()[1:]  # Skip header line
+            lines = f.readlines()
+            # Skip header line if present
+            data_lines = lines[1:] if lines and lines[0].startswith("timestamp") else lines
 
             events = []
-            for line in lines:
+            for line in data_lines:
                 line = line.strip()
-                if line:  # Skip empty lines
-                    values = line.split(', ')
-                    if len(values) == 5:
-                        try:
-                            event = Event(timestamp=int(values[0]),
-                                          event_type=EventType(int(values[1])),
-                                          driver_id=int(values[2]) if values[2] != 'None' else None,
-                                          request_id=int(values[3]) if values[3] != 'None' else None,
-                                          wait_time=int(values[4]) if values[4] != 'None' else None)
-                        except ValueError:
-                            continue
-                        events.append(event)
+                if not line:
+                    continue
+                values = line.split(', ')
+                # Require 6 fields (new format)
+                if len(values) != 6:
+                    continue
+                ts, et, did, rid, wt, behaviour_name = values
+                behaviour_name = None if behaviour_name == 'None' else behaviour_name
+                try:
+                    event = Event(timestamp=int(ts),
+                                  event_type=EventType(int(et)),
+                                  driver_id=int(did) if did != 'None' else None,
+                                  request_id=int(rid) if rid != 'None' else None,
+                                  wait_time=int(wt) if wt != 'None' else None,
+                                  behaviour_name=behaviour_name)
+                except ValueError:
+                    continue
+                events.append(event)
             return events
 
     def get_events_by_type(self, status: EventType):
