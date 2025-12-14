@@ -111,7 +111,7 @@ class MetricsManager:
             out_dir = self._get_run_output_dir()
             out_path = os.path.join(out_dir, f"{self.run_id}_requests_over_time.png")
             plt.savefig(out_path)
-            plt.close()
+            plt.show()
         else:
             plt.show()
 
@@ -161,7 +161,7 @@ class MetricsManager:
             out_dir = self._get_run_output_dir()
             out_path = os.path.join(out_dir, f"{self.run_id}_driver_mutations.png")
             plt.savefig(out_path)
-            plt.close()
+            plt.show()
         else:
             plt.show()
 
@@ -266,7 +266,7 @@ class MetricsManager:
             out_dir = self._get_run_output_dir()
             out_path = os.path.join(out_dir, f"{self.run_id}_behaviour_deliveries.png")
             plt.savefig(out_path)
-            plt.close()
+            plt.show()
         else:
             plt.show()
 

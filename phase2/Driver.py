@@ -53,6 +53,7 @@ class Driver:
         self.behaviour = behaviour
         self.history = history
         self.run_id = run_id
+        self.idle_time = 0
         self.dir_vector: Point | None = None
 
     def __str__(self):

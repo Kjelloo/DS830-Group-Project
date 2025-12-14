@@ -255,11 +255,11 @@ class GUIAdapter:
         ui_drivers = []
 
         for d in self.simulation.drivers:
-            dir_vector = d.dir_vector if d.dir_vector is not None else (0.0, 0.0)
+            dir_vector = d.dir_vector if d.dir_vector is not None else Point(0.0, 0.0)
             target_pt = d.target_point()
 
-            tx = float(target_pt.x) if target_pt is not None else 0.0
-            ty = float(target_pt.y) if target_pt is not None else 0.0
+            tx = float(target_pt.x) if target_pt is not None else Point(0.0, 0.0)
+            ty = float(target_pt.y) if target_pt is not None else Point(0.0, 0.0)
 
             target_id = d.current_request.id if getattr(d, 'current_request', None) is not None else None
 
@@ -268,8 +268,8 @@ class GUIAdapter:
                 'x': float(d.position.x),
                 'y': float(d.position.y),
                 'status': d.status.name.lower(),
-                'vx': float(dir_vector[0]),
-                'vy': float(dir_vector[1]),
+                'vx': float(dir_vector.x),
+                'vy': float(dir_vector.y),
                 'tx': tx,
                 'ty': ty,
                 'target_id': target_id
