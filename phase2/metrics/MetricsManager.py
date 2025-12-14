@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import os
+from collections import Counter
 from phase2.metrics.Event import EventType
 from phase2.metrics.EventManager import EventManager
 
@@ -85,7 +86,6 @@ class MetricsManager:
             out_dir = self._get_run_output_dir()
             out_path = os.path.join(out_dir, f"{self.run_id}_requests_over_time.png")
             plt.savefig(out_path)
-            print(f"Saved Requests Over Time plot to: {out_path}")
             plt.show()
         else:
             plt.show()
@@ -94,7 +94,43 @@ class MetricsManager:
         pass
 
     def _plot_driver_mutations(self, save: bool = False):
-        pass
+        # Count mutations per driver from events
+        events = self.event_manager.get_events_by_type(EventType.BEHAVIOUR_CHANGED)
+        if not events:
+            print("No BEHAVIOUR_CHANGED events recorded; skipping Driver Mutations plot.")
+            return
+
+        # Tally by driver_id
+        counts = Counter()
+        for ev in events:
+            # Only count if driver_id is present
+            if ev.driver_id is not None:
+                counts[ev.driver_id] += 1
+
+        if not counts:
+            print("No driver IDs found in BEHAVIOUR_CHANGED events; skipping Driver Mutations plot.")
+            return
+
+        # Prepare data for plotting
+        driver_ids = sorted(counts.keys())
+        mutation_counts = [counts[d] for d in driver_ids]
+
+        # Plot bar chart
+        plt.figure(figsize=(10, 6))
+        plt.bar([str(d) for d in driver_ids], mutation_counts, color="tab:purple")
+        plt.xlabel("Driver ID")
+        plt.ylabel("Mutation Count")
+        plt.title(f"Driver Behaviour Mutations (Run {self.run_id})")
+        plt.grid(True, axis='y', linestyle='--', alpha=0.4)
+        plt.tight_layout()
+
+        if save:
+            out_dir = self._get_run_output_dir()
+            out_path = os.path.join(out_dir, f"{self.run_id}_driver_mutations.png")
+            plt.savefig(out_path)
+            plt.show()
+        else:
+            plt.show()
 
     def _plot_behaviour_deliveries(self, save: bool = False):
         pass
