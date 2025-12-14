@@ -12,6 +12,13 @@ from phase2.metrics.EventManager import EventManager
 
 class MutationRule:
     def __init__(self, n_trips: int, threshold: float, run_id: str) -> None:
+        if not isinstance(n_trips, int):
+            raise TypeError("n_trips must be an integer")
+        if not isinstance(threshold, float):
+            raise TypeError("threshold must be an float")
+        if not isinstance(run_id, str):
+            raise TypeError("run_id must be a string")
+
         self.n_trips = n_trips
         self.threshold = threshold
         self.run_id = run_id

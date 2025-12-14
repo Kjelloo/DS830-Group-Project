@@ -20,10 +20,18 @@ class RequestGenerator:
         # rate: expected number of new requests per tick (e.g. 0.5, 1.0, 2.3)
         # width, height: size of the map
         # start_id: first id to use
+        if not isinstance(rate, (float, int)):
+            raise TypeError("rate must be a number")
         if rate < 0:
             raise ValueError("rate must be non-negative")
+        if not isinstance(width, (int, float)) or not isinstance(height, (int, float)):
+            raise TypeError("width and height must be a number")
         if width < 0 or height < 0:
             raise ValueError("width and height must be non-negative")
+        if not isinstance(start_id, int):
+            raise TypeError("start_id must be a number")
+        if not isinstance(run_id, str):
+            raise TypeError("run_id must be a string")
 
         self.rate = rate
         self.width = width
@@ -40,6 +48,8 @@ class RequestGenerator:
         """
         eventManager = EventManager(self.run_id)
 
+        if not isinstance(time, (int, float)):
+            raise TypeError("time must be a number")
         if time < 0:
             raise ValueError("time must be non-negative")
 
