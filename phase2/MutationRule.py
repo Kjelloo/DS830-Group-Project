@@ -65,6 +65,7 @@ class MutationRule:
             candidates = behaviour_classes
 
         new_behaviour_cls = choice(candidates)
-        driver.behaviour = new_behaviour_cls
+        # instantiate the new behaviour class (dont assign the class object)
+        driver.behaviour = new_behaviour_cls()
 
         eventManager.add_event(Event(time, EventType.BEHAVIOUR_CHANGED, driver.id, None, None))

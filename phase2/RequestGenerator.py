@@ -67,10 +67,10 @@ class RequestGenerator:
 
         for _ in range(num):
             # random pick_up and dropoff inside the map
-            px = random.uniform(0, self.width)
-            py = random.uniform(0, self.height)
-            dx = random.uniform(0, self.width)
-            dy = random.uniform(0, self.height)
+            px = int(min(round(random.uniform(0, self.width)), self.width - 1))
+            py = int(min(round(random.uniform(0, self.height)), self.height - 1))
+            dx = int(min(round(random.uniform(0, self.width)), self.width - 1))
+            dy = int(min(round(random.uniform(0, self.height)), self.height - 1))
 
             pickup = Point(px, py)
             dropoff = Point(dx, dy)
@@ -91,12 +91,3 @@ class RequestGenerator:
             self.next_id += 1
 
         return new_requests
-
-
-if __name__ == "__main__":
-    rg = RequestGenerator(rate=1, width=10, height=5, run_id="test_run")
-
-    for t in range(1):
-        new_reqs = rg.maybe_generate(t)
-        for req in new_reqs:
-            print(f"{req}")
