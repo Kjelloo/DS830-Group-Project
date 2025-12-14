@@ -139,12 +139,16 @@ class DeliverySimulation:
             if req.assigned_driver is not None:
                 # Find the assigned driver and expire the current request
                 assigned_driver = next((driver for driver in self.drivers if driver.id == req.assigned_driver), None)
+
                 if assigned_driver is not None:
+                    self.statistics['expired'] += 1
                     assigned_driver.expire_current_request(self.time)
                 else:
                     # This should not happen, but just in case
+                    self.statistics['expired'] += 1
                     req.mark_expired(self.time)
             else:
+                self.statistics['expired'] += 1
                 req.mark_expired(self.time)
 
     @staticmethod
@@ -179,7 +183,6 @@ class DeliverySimulation:
         """
         Move drivers and handle pickup/dropoff events.
         """
-
         for driver in drivers:
             # Handle idle drivers
             if driver.status == DriverStatus.IDLE:
@@ -201,6 +204,8 @@ class DeliverySimulation:
             # Handle dropoffs
             if driver.status == DriverStatus.TO_DROPOFF and driver.within_one_step_of_target():
                 driver.position = driver.current_request.dropoff
+                self.statistics['served'] += 1
+                self.statistics['served_waits'].append(driver.current_request.wait_time)
                 driver.complete_dropoff(self.time)
                 continue
 
