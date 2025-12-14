@@ -71,7 +71,8 @@ class DeliverySimulation:
         self._update_req_wait_times()
 
         # Compute proposed assignments via dispatch_policy
-        proposals = self.dispatch_policy.assign(drivers=self.drivers, requests=self.requests, time=self.time, run_id=self.run_id)
+        proposals = self.dispatch_policy.assign(drivers=self.drivers, requests=self.requests,
+                                                time=self.time, run_id=self.run_id)
 
         # Make offers and get driver responses
         offers = self._create_offers(proposals)
@@ -184,6 +185,7 @@ class DeliverySimulation:
             if driver.status == DriverStatus.TO_PICKUP and driver.within_one_step_of_target():
                 driver.position = driver.current_request.pickup
                 driver.complete_pickup(self.time)
+                continue
 
             if driver.status == DriverStatus.TO_DROPOFF and driver.within_one_step_of_target():
                 driver.position = driver.current_request.dropoff

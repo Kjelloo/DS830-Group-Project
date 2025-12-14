@@ -1,15 +1,13 @@
 from __future__ import annotations
-
 import os
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from Event import Event, EventType
+from phase2.metrics.Event import Event, EventType
 
 
 class EventManager:
     def __init__(self, run_id: str):
         self.filepath = os.path.join(os.path.abspath(os.path.dirname(__file__)), "runs", f"{run_id}.csv")
+        if "test_run" in self.filepath:
+            return
 
         dirpath = os.path.dirname(self.filepath)
         if dirpath and not os.path.exists(dirpath):
@@ -25,6 +23,8 @@ class EventManager:
 
     def add_event(self, event: Event):
         # Append the event to csv file
+        if "test_run" in self.filepath:
+            return
         with open(self.filepath, 'a') as f:
             f.write("{timestamp}, "
                     "{event_type}, "

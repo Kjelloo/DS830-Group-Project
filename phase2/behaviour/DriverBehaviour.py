@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
-from phase2.Driver import Driver
-from phase2.Offer import Offer
+if TYPE_CHECKING:
+    from phase2.Driver import Driver
+    from phase2.Offer import Offer
 
 
 class DriverBehaviour(ABC):
