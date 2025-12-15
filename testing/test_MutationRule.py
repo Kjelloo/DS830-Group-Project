@@ -162,7 +162,7 @@ class TestMutationRuleMaybeMutate(unittest.TestCase):
 
         self.assertEqual(
             set(chosen_candidates),
-            {GreedyDistanceBehaviour.GreedyDistanceBehaviour, LazyBehaviour.LazyBehaviour}
+            {GreedyDistanceBehaviour.GreedyDistanceBehaviour}
         )
 
 

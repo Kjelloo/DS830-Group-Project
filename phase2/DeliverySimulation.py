@@ -59,7 +59,7 @@ class DeliverySimulation:
 
         1. Generate new requests.
         2. Update waiting times and mark expired requests.
-        3. Compute proposed assignments via dispatch_policy.
+        3. Compute proposed assignments via dispatch_policy. (missing)
         4. Convert proposals to offers, ask driver behaviours to accept/reject.
         5. Resolve conflicts and finalise assignments.
         6. Move drivers and handle pickup/dropoff events.
@@ -77,11 +77,11 @@ class DeliverySimulation:
         proposals = self.dispatch_policy.assign(drivers=self.drivers, requests=self.requests, time=self.time,
                                                 run_id=self.run_id)
 
-        # Make offers and get driver responses
+
         offers = self._create_offers(proposals)
 
-        # Resolve conflicts and finalise assignments
-        self._resolve_offers(offers)
+        # Get driver responses to offers, resolve conflicts and finalize assignments
+        self._assign_and_resolve_offers(offers)
 
         # Move drivers and handle pickup/dropoff events
         self._move_drivers(self.drivers, dt=1.0)
@@ -160,28 +160,52 @@ class DeliverySimulation:
         Create offers based on proposals.
         """
         offers = []
+
         for driver, request in proposals:
-            estimated_travel = driver.calc_delivery_estimated_travel_time(request)
-            estimated_reward = driver.calc_delivery_estimated_reward(request)
-            offers.append(Offer(driver=driver, request=request, estimated_travel_time=estimated_travel,
+            estimated_total_distance = driver.calc_estimated_total_time_to_delivery(request)
+            estimated_distance_to_pickup = driver.position.distance_to(request.pickup)
+            estimated_reward = driver.calc_estimated_delivery_reward(request)
+
+            offers.append(Offer(driver=driver, request=request,
+                                estimated_total_distance=estimated_total_distance,
+                                estimated_distance_to_pickup=estimated_distance_to_pickup,
                                 estimated_reward=estimated_reward))
+
         return offers
 
-    def _resolve_offers(self, offers: list[Offer]) -> None:
+    def _assign_and_resolve_offers(self, offers: list[Offer]) -> None:
         """
-        Resolve offers, finalise assignments based on driver responses.
+        Offer and resolve offers, and finalise assignments based on driver responses
         """
-        accepted = []
+
+        # Initialize data structures to keep track of busy drivers and accepted requests
+        busy_drivers = set()
+        accepted_requests = set()
+
+        # Sort offers by estimated travel time in ascending order
+        if len(offers) == 0: return
+
+        # Iteratively offer offers to drivers
         for offer in offers:
-            accepted.append(
-                offer.driver.behaviour.decide(driver=offer.driver, offer=offer, time=self.time, run_id=self.run_id))
+            # Make sure offer is not already accepted and driver is not busy
+            if offer.driver.id in busy_drivers or offer.request.id in accepted_requests:
+                continue
 
-        if len(accepted) > 0:
-            # Sort offers by estimated travel time in descending order
-            sorted_offers = sorted(offers, key=lambda off: off.estimated_travel_time, reverse=True)
+            # As a design choice, we omit the below code in order to mutate based on expired accepted requests.
+            """
+            # Make sure driver have time to make the delivery. If not, skip offer
+            total_time_to_delivery = offer.driver.calc_estimated_total_time_to_delivery(offer.request)
+            time_left_before_expiration = self.timeout - offer.request.wait_time
+            if total_time_to_delivery > time_left_before_expiration:
+                continue
+            """
 
-            accepted_offer = sorted_offers[0]
-            sorted_offers[0].driver.assign_request(request=accepted_offer.request, current_time=self.time)
+            # Let driver decide whether to accept offer or not
+            if offer.driver.behaviour.decide(offer.driver, offer, self.time, self.run_id):
+                # Assign request and track decisions if offer is accepted
+                offer.driver.assign_request(request=offer.request, current_time=self.time)
+                busy_drivers.add(offer.driver.id)
+                accepted_requests.add(offer.request.id)
 
     def _move_drivers(self, drivers: list[Driver], dt: float) -> None:
         """

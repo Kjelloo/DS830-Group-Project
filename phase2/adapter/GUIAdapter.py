@@ -374,6 +374,8 @@ class GUIAdapter:
                       history=[],
                       run_id=self.run_id)
 
+
+
     def _dict_to_request(self, request: dict) -> Request:
         if isinstance(request, Request):
             return request
@@ -387,28 +389,28 @@ class GUIAdapter:
 
         status_str = str(request.get('status', 'waiting')).lower()
 
-        status = RequestStatus.WAITING
+        status_map = {
+            'waiting': RequestStatus.WAITING,
+            'assigned': RequestStatus.ASSIGNED,
+            'picked': RequestStatus.PICKED,
+            'delivered': RequestStatus.DELIVERED,
+            'expired': RequestStatus.EXPIRED,
+        }
 
-        match status_str:
-            case 'waiting':
-                status = RequestStatus.WAITING
-            case 'assigned':
-                status = RequestStatus.ASSIGNED
-            case 'picked':
-                status = RequestStatus.PICKED
-            case 'delivered':
-                status = RequestStatus.DELIVERED
-            case 'expired':
-                status = RequestStatus.EXPIRED
+        status = status_map.get(status_str, RequestStatus.WAITING)
 
-        return Request(id=req_id,
-                       pickup=Point(px, py),
-                       dropoff=Point(dx, dy),
-                       creation_time=t,
-                       status=status,
-                       assigned_driver=None,
-                       wait_time=0,
-                       run_id=self.run_id)
+        return Request(
+            id=req_id,
+            pickup=Point(px, py),
+            dropoff=Point(dx, dy),
+            creation_time=t,
+            status=status,
+            assigned_driver=None,
+            wait_time=0,
+            run_id=self.run_id,
+        )
+
+
 
     def _driver_to_dict(self, d: Driver) -> dict:
         dir_vector = d.dir_vector if d.dir_vector is not None else (0.0, 0.0)

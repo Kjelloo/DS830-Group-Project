@@ -1,12 +1,10 @@
 Classes for testing (including their methods):
-    [x] Driver (Mangler test af expire_current_request())
+    [ ] Driver (Mangler test af expire_current_request())
     [x] Point
     [x] Request
     [x] RequestGenerator
     [x] Offer
     [x] MutationRule
-  ( [ ] LoadDrivers )
-  ( [ ] LoadRequests )
 
     [x] DriverBehaviour
     [x] EarningsMaxBehaviour
@@ -19,13 +17,3 @@ Classes for testing (including their methods):
     [x] Event
     [x] EventManager
     [ ] DeliverySimulation
-
-  ( [ ] LazyBehaviour )
-
-Other to-dos:
-    [ ] Create load_drivers function
-    [ ] Create generate_drivers function
-
-Skal forklares:
-    [ ] Hvordan virker _resolve_offers()?
-    [ ] Er det driveren, der skal expire requests?

@@ -1,11 +1,10 @@
 from __future__ import annotations
-
 import math
+from enum import Enum
 
 from phase2.Point import Point
 from phase2.Request import Request
 from phase2.behaviour.DriverBehaviour import DriverBehaviour
-from enum import Enum
 
 
 class DriverStatus(Enum):
@@ -78,7 +77,6 @@ class Driver:
             return
 
     def assign_request(self, request: Request, current_time: int) -> None:
-        # Do we need to implement assignment based on behaviour here???
         if not isinstance(request, Request):
             raise TypeError(f"request must be Request, got {type(request).__name__}")
         if not isinstance(current_time, int):
@@ -88,7 +86,6 @@ class Driver:
         self.status = DriverStatus.TO_PICKUP
         self.current_request.mark_assigned(self.id, current_time)
         self.compute_direction_vector()
-        # TODO: Implement data collection
 
     def target_point(self) -> Point | None:
         """
@@ -131,7 +128,6 @@ class Driver:
         """
         Expires the current request.
         """
-        # NOTE: er det driverens ansvar at expire?
         if self.current_request is not None:
             self.current_request.mark_expired(time)
             self.history.append(self.current_request)
@@ -163,28 +159,22 @@ class Driver:
         self.current_request = None
         self.compute_direction_vector()
 
-        # Should more be done with the request when drop off is complete??? (Magnus)
-        # TODO: Implement data collection.
-
-    def calc_delivery_estimated_travel_time(self, request: Request) -> float:
+    def calc_estimated_total_time_to_delivery(self, request: Request) -> float:
         """
-        Calculates the estimated travel time for a given request.
+        Calculates the estimated travel time tics for a given request.
         """
         if not isinstance(request, Request):
             raise TypeError(f"request must be Request, got {type(request).__name__}")
 
         d1 = self.position.distance_to(request.pickup) # distance to pickup
         d2 = request.pickup.distance_to(request.dropoff) # distance from pickup to dropoff
-        return (d1 + d2) / self.speed
+        return d1 + d2
 
-    def calc_delivery_estimated_reward(self, request: Request) -> float:
-        """
-        Calculates the estimated reward for a given request.
-        """
+    def calc_estimated_delivery_reward(self, request: Request) -> float:
         if not isinstance(request, Request):
-            raise TypeError(f"request must be Request, got {type(request).__name__}")
+                raise TypeError(f"request must be Request, got {type(request).__name__}")
 
-        base_fare = 5.0  # TODO: Make configurable
-        per_step_rate = 2.0  # TODO: Make configurable
-        travel_time = self.calc_delivery_estimated_travel_time(request)
-        return base_fare + (per_step_rate * travel_time)
+        base_reward = 15
+        reward_per_distance = 0.7
+
+        return base_reward + (reward_per_distance * self.calc_estimated_total_time_to_delivery(request) / self.speed)

@@ -7,7 +7,8 @@ class GlobalGreedyPolicy(DispatchPolicy):
     def assign(self, drivers: list[Driver], requests: list[Request], time: int, run_id: str) -> list[
         tuple[Driver, Request]]:
         """
-        build all (idle driver, waiting request) pairs, sort by distance, and match greedily while avoiding reuse of drivers and requests
+        build all (idle driver, waiting request) pairs, sort by distance,
+        and match greedily while avoiding reuse of drivers and requests
         """
         # Get lists of idle drivers and waiting requests
         idle_drivers = [driver for driver in drivers if driver.status.value == DriverStatus.IDLE.value]
