@@ -16,4 +16,4 @@ Classes for testing (including their methods):
 
     [x] Event
     [x] EventManager
-    [ ] DeliverySimulation
+    [x] DeliverySimulation
