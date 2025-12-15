@@ -13,8 +13,9 @@ class EventType(Enum):
     REQUEST_EXPIRED = 5
     REQUEST_PICKED = 6
     REQUEST_DELIVERED = 7
-    BEHAVIOUR_CHANGED = 8
+    BEHAVIOUR_CHANGED = 8 # Behaviour when a driver changes behaviour
     DRIVER_IDLE = 9
+    DRIVER_GENERATED_BEHAVIOUR = 10 # Behaviour when a driver is generated
 
 
 @dataclass

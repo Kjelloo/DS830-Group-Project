@@ -228,16 +228,15 @@ class GUIAdapter:
 
         # log initial behaviour for each driver so early deliveries are attributed correctly
         # this is only necessary due to the need of the gui adapter to re-create the simulation
-        # we have to do this workaround
         em = EventManager(self.run_id)
         for d in self.simulation.drivers:
             try:
                 behaviour_name = type(d.behaviour).__name__
             except Exception:
                 behaviour_name = 'Unknown'
-            # Log at time 0 (or current simulation time if preferred)
-            em.add_event(Event(timestamp=0,
-                               event_type=EventType.BEHAVIOUR_CHANGED,
+
+            em.add_event(Event(timestamp=self.simulation.time,
+                               event_type=EventType.DRIVER_GENERATED_BEHAVIOUR,
                                driver_id=d.id,
                                request_id=None,
                                wait_time=None,
