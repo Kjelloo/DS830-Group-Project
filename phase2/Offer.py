@@ -20,7 +20,7 @@ class Offer:
         if not isinstance(self.request, Request):
             raise TypeError("request must be a Request")
         if not isinstance(self.estimated_total_distance, (int,float)):
-            raise TypeError("estimated_total_travel_time must be a float")
+            raise TypeError("estimated_total_distance must be a number")
         if not isinstance(self.estimated_distance_to_pickup, (int, float)):
             raise TypeError("estimated_travel_time must be a number")
         if not isinstance(self.estimated_reward, (int, float)):

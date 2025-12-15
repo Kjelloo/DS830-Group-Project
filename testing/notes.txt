@@ -1,5 +1,5 @@
 Classes for testing (including their methods):
-    [ ] Driver (Mangler test af expire_current_request())
+    [x] Driver (Mangler test af expire_current_request())
     [x] Point
     [x] Request
     [x] RequestGenerator
@@ -12,7 +12,7 @@ Classes for testing (including their methods):
 
     [x] DispatchPolicy
     [x] GlobalGreedyPolicy
-    [ ] NearestNeighborPolicy
+    [x] NearestNeighborPolicy
 
     [x] Event
     [x] EventManager

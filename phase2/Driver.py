@@ -159,7 +159,7 @@ class Driver:
         self.current_request = None
         self.compute_direction_vector()
 
-    def calc_estimated_total_time_to_delivery(self, request: Request) -> float:
+    def calc_estimated_total_dist_to_delivery(self, request: Request) -> float:
         """
         Calculates the estimated travel time tics for a given request.
         """
@@ -177,4 +177,4 @@ class Driver:
         base_reward = 15
         reward_per_distance = 0.7
 
-        return base_reward + (reward_per_distance * self.calc_estimated_total_time_to_delivery(request) / self.speed)
+        return base_reward + (reward_per_distance * self.calc_estimated_total_dist_to_delivery(request))
