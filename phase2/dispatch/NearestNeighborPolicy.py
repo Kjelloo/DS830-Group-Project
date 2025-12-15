@@ -28,7 +28,7 @@ class NearestNeighborPolicy(DispatchPolicy):
         # Repeatedly find the closest (driver, request) pair and remove them from the pool
         for driver in idle_drivers:
             current_request = None
-            current_distance = 999 # arbitrarily high number
+            current_distance = float("inf") # arbitrarily high number
 
             # Find the closest pair among remaining idle drivers and waiting requests
             for request in waiting_requests:

@@ -175,12 +175,15 @@ class MetricsManager:
         behaviour (EarningsMaxBehaviour, GreedyDistanceBehaviour, LazyBehaviour).
 
         Args:
-            save: If True, save the figure as `<run_id>_behaviour_deliveries.png` inside the
+            save (bool): If True, save the figure as `<run_id>_behaviour_deliveries.png` inside the
                   run's output folder. If False, show the plot interactively.
         """
         # Get all deliveries and behaviour change events
         deliveries = self.event_manager.get_events_by_type(EventType.REQUEST_DELIVERED)
-        behaviour_changes = self.event_manager.get_events_by_type(EventType.BEHAVIOUR_CHANGED)
+
+        # Combine driver-generated behaviour and behaviour-changed events
+        behaviour_changes = (self.event_manager.get_events_by_type(EventType.DRIVER_GENERATED_BEHAVIOUR) +
+                             self.event_manager.get_events_by_type(EventType.BEHAVIOUR_CHANGED))
 
         # If no deliveries at all, there's nothing to plot
         if not deliveries:
@@ -188,7 +191,6 @@ class MetricsManager:
             return
 
         # Build a simple timeline (sorted list) of behaviour changes per driver
-        # Example: {driver_id: [Event(... at t=0), Event(... at t=50), ...], ...}
         changes_by_driver = {}
         for ev in behaviour_changes:
             if ev.driver_id is None:
@@ -196,6 +198,7 @@ class MetricsManager:
             if ev.driver_id not in changes_by_driver:
                 changes_by_driver[ev.driver_id] = []
             changes_by_driver[ev.driver_id].append(ev)
+
         # Sort each driver's changes by time so we can scan from earliest to latest
         for driver_id in changes_by_driver:
             changes_by_driver[driver_id].sort(key=lambda e: e.timestamp)
