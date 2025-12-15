@@ -162,7 +162,7 @@ class DeliverySimulation:
         offers = []
 
         for driver, request in proposals:
-            estimated_total_distance = driver.calc_estimated_total_time_to_delivery(request)
+            estimated_total_distance = driver.calc_estimated_total_dist_to_delivery(request)
             estimated_distance_to_pickup = driver.position.distance_to(request.pickup)
             estimated_reward = driver.calc_estimated_delivery_reward(request)
 
