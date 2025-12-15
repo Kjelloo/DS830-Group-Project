@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Optional, Dict, Callable, Any
 from gui._engine import run_app
+from phase2.dispatch.NearestNeighborPolicy import NearestNeighborPolicy
 
 
 def main(backend: Optional[Dict[str, Callable[..., Any]]] = None) -> None:
@@ -31,7 +32,8 @@ if __name__ == "__main__":
         drivers=list[Driver](),
         requests=list[Request](),
         mutation_rule=MutationRule(n_trips=5, threshold=0.7, run_id=run_id),
-        dispatch_policy=GlobalGreedyPolicy(),
+        dispatch_policy=NearestNeighborPolicy(),
+        #dispatch_policy=GlobalGreedyPolicy(),
         run_id=run_id,
         timeout=30,
         statistics={},

@@ -35,6 +35,7 @@ class NearestNeighborPolicy(DispatchPolicy):
                             current_distance = distance
                             current_request = request
                             assigned_requests.add(request.id)
-            pairs.append((driver, current_request))
+            if current_request is not None:
+                pairs.append((driver, current_request))
 
         return pairs
