@@ -10,14 +10,17 @@ from phase2.metrics.EventManager import EventManager
 class EarningsMaxBehaviour(DriverBehaviour):
     def decide(self, driver: Driver, offer: Offer, time: int, run_id: str) -> bool:
         """
-        Accept if the ratio estimated reward divided by travel time is above a threshold.
+        Accept if the ratio estimated reward divided by travel distance is above a threshold.
         """
         eventManager = EventManager(run_id)
 
-        threshold = 1.0  # TODO: Not sure what a good threshold is yet
-        ratio = offer.estimated_reward / offer.estimated_travel_time
+        # hardcode threshold
+        threshold = 1.45 # based on testing
 
-        if ratio >= threshold:
+        # compute ratio
+        ratio = offer.estimated_reward / offer.estimated_total_distance
+
+        if ratio > threshold:
             eventManager.add_event(Event(time, EventType.REQUEST_PROPOSAL_ACCEPTED, driver.id, offer.request.id, None))
             return True
         else:

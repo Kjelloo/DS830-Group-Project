@@ -5,8 +5,6 @@ Classes for testing (including their methods):
     [x] RequestGenerator
     [x] Offer
     [x] MutationRule
-  ( [ ] LoadDrivers )
-  ( [ ] LoadRequests )
 
     [x] DriverBehaviour
     [x] EarningsMaxBehaviour
@@ -14,18 +12,8 @@ Classes for testing (including their methods):
 
     [x] DispatchPolicy
     [x] GlobalGreedyPolicy
-    [ ] NearestNeighborPolicy
+    [x] NearestNeighborPolicy
 
     [x] Event
     [x] EventManager
-    [ ] DeliverySimulation
-
-  ( [ ] LazyBehaviour )
-
-Other to-dos:
-    [ ] Create load_drivers function
-    [ ] Create generate_drivers function
-
-Skal forklares:
-    [ ] Hvordan virker _resolve_offers()?
-    [ ] Er det driveren, der skal expire requests?
+    [x] DeliverySimulation
