@@ -4,17 +4,21 @@ from random import choice
 
 from phase2.Driver import Driver
 from phase2.Request import RequestStatus
-
 from phase2.behaviour.EarningsMaxBehaviour import EarningsMaxBehaviour
 from phase2.behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
-from phase2.behaviour.LazyBehaviour import LazyBehaviour
-
-from phase2.metrics.EventManager import EventManager
 from phase2.metrics.Event import Event, EventType
+from phase2.metrics.EventManager import EventManager
 
 
 class MutationRule:
     def __init__(self, n_trips: int, threshold: float, run_id: str) -> None:
+        if not isinstance(n_trips, int):
+            raise TypeError("n_trips must be an integer")
+        if not isinstance(threshold, float):
+            raise TypeError("threshold must be an float")
+        if not isinstance(run_id, str):
+            raise TypeError("run_id must be a string")
+
         self.n_trips = n_trips
         self.threshold = threshold
         self.run_id = run_id
@@ -50,7 +54,8 @@ class MutationRule:
         """
         eventManager = EventManager(self.run_id)
 
-        behaviour_classes = [EarningsMaxBehaviour, GreedyDistanceBehaviour, LazyBehaviour]
+        # TODO: Add LazyBehaviour once implemented
+        behaviour_classes = [EarningsMaxBehaviour, GreedyDistanceBehaviour]
         current_type = type(driver.behaviour)
         candidates = [b for b in behaviour_classes if b is not current_type]
 
@@ -58,7 +63,9 @@ class MutationRule:
             candidates = behaviour_classes
 
         new_behaviour_cls = choice(candidates)
-        # instantiate the new behaviour class (dont assign the class object)
         driver.behaviour = new_behaviour_cls()
+        driver.history.clear()  # Reset history after mutation
 
-        eventManager.add_event(Event(time, EventType.BEHAVIOUR_CHANGED, driver.id, None, None))
+        # Log change with behaviour name for downstream metrics
+        eventManager.add_event(Event(time, EventType.BEHAVIOUR_CHANGED, driver.id, None, None,
+                                     behaviour_name=type(driver.behaviour).__name__))

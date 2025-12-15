@@ -3,8 +3,10 @@ from __future__ import annotations
 from enum import Enum
 
 from phase2.Point import Point
-from phase2.metrics.EventManager import EventManager
 from phase2.metrics.Event import Event, EventType
+from phase2.metrics.EventManager import EventManager
+
+
 
 class RequestStatus(Enum):
     WAITING = 1
@@ -32,6 +34,7 @@ class Request:
         self.assigned_driver = assigned_driver
         self.wait_time = wait_time
         self.eventManager = EventManager(run_id)
+        self.run_id = run_id
 
     def __str__(self) -> str:
         return f"Request(id={self.id}, pick_up={self.pickup}, drop_off={self.dropoff}, " \
@@ -46,7 +49,7 @@ class Request:
         Returns true if the request is still waiting,
         assigned or picked (that is, not delivered or expired).
         """
-        if self.status.value == RequestStatus.DELIVERED.value or self.status.value == RequestStatus.EXPIRED.value:
+        if self.status == RequestStatus.DELIVERED or self.status == RequestStatus.EXPIRED:
             return False
         else:
             return True

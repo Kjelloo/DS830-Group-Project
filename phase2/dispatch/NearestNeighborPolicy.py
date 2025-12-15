@@ -4,7 +4,8 @@ from phase2.dispatch.DispatchPolicy import DispatchPolicy
 
 
 class NearestNeighborPolicy(DispatchPolicy):
-    def assign(self, drivers: list[Driver], requests: list[Request], time: int, run_id: str) -> list[tuple[Driver, Request]]:
+    def assign(self, drivers: list[Driver], requests: list[Request], time: int, run_id: str) -> list[
+        tuple[Driver, Request]]:
         """
         repeatedly match the closest idle driver to the closest waiting request, avoiding reuse of drivers and requests
         """
