@@ -16,7 +16,7 @@ class GreedyDistanceBehaviour(DriverBehaviour):
 
         # hardcode distance to pickup threshold
         threshold = 21.2 # ~ avg dist between two points in 50x30 grid
-        threshold *= 0.7 # scalar found by testing with varying parameters
+        threshold *= 0.9 # scalar found by testing with varying parameters
 
         if offer.estimated_distance_to_pickup < threshold:
             eventManager.add_event(Event(time, EventType.REQUEST_PROPOSAL_ACCEPTED, driver.id, offer.request.id, None))

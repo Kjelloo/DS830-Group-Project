@@ -15,10 +15,13 @@ class EarningsMaxBehaviour(DriverBehaviour):
         eventManager = EventManager(run_id)
 
         # hardcode threshold
-        threshold = 1.45 # based on testing
+        threshold = 2.375 # optimized based on manual testing
 
         # compute ratio
-        ratio = offer.estimated_reward / offer.estimated_total_distance
+        try:
+            ratio = offer.estimated_reward / offer.estimated_total_distance
+        except ZeroDivisionError:
+            ratio = float('inf')
 
         if ratio > threshold:
             eventManager.add_event(Event(time, EventType.REQUEST_PROPOSAL_ACCEPTED, driver.id, offer.request.id, None))

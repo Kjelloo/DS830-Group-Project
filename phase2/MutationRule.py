@@ -50,17 +50,13 @@ class MutationRule:
             last_n_trips = driver.history[-self.n_trips:]
             expired_trips = [trips for trips in last_n_trips if trips.status == RequestStatus.EXPIRED]
 
-            threshold = 0.3 # hardcode threshold
-            if len(expired_trips) / self.n_trips > threshold:
-                self.__mutate_driver(driver, time) # switch to a less picky behaviour
+            if len(expired_trips) / self.n_trips >= self.threshold:
+                self.__mutate_driver(driver, time) # switch to a less optimal behaviour
+            if random() < 0.05: # 5% of the time, switch to a less optimal behaviour
+                self.__mutate_driver(driver, time)
 
         if type(driver.behaviour) == GreedyDistanceBehaviour:
-            last_n_trips = driver.history[-self.n_trips:]
-            non_expired_trips = [trips for trips in last_n_trips if trips.status != RequestStatus.EXPIRED]
-
-            threshold = 0.9 # hardcode threshold
-            if len(non_expired_trips) / self.n_trips >= threshold:
-                self.__mutate_driver(driver, time) # switch to a more picky behaviour
+            if random() < (1 - self.threshold): self.__mutate_driver(driver, time)  # switch to a more optimal behaviour
 
     def __mutate_driver(self, driver: Driver, time: int) -> None:
         """

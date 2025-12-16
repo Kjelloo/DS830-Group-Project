@@ -29,6 +29,31 @@ class DeliverySimulation:
                  timeout: int,
                  statistics: dict,
                  run_id: str) -> None:
+
+        # Type checking
+        if not isinstance(time, int):
+            raise TypeError("time must be int")
+        if not isinstance(width, int):
+            raise TypeError("width must be int")
+        if not isinstance(height, int):
+            raise TypeError("height must be int")
+        if not isinstance(timeout, int):
+            raise TypeError("timeout must be int")
+        if not isinstance(run_id, str):
+            raise TypeError("run_id must be str")
+        if not isinstance(drivers, list) or not all(isinstance(d, Driver) for d in drivers):
+            raise TypeError("drivers must be list[Driver]")
+        if not isinstance(requests, list) or not all(isinstance(r, Request) for r in requests):
+            raise TypeError("requests must be list[Request]")
+        if not isinstance(request_generator, RequestGenerator):
+            raise TypeError("request_generator must be RequestGenerator")
+        if not isinstance(dispatch_policy, DispatchPolicy):
+            raise TypeError("dispatch_policy must be DispatchPolicy")
+        if not isinstance(mutation_rule, MutationRule):
+            raise TypeError("mutation_rule must be MutationRule")
+        if not isinstance(statistics, dict):
+            raise TypeError("statistics must be dict")
+
         self.time = time
         self.width = width
         self.height = height
@@ -151,7 +176,7 @@ class DeliverySimulation:
                     self.statistics['expired'] += 1
                     req.mark_expired(self.time)
             else:
-                self.statistics['expired'] += 1
+                self.statistics['expired'] = self.statistics.get('expired', 0) + 1
                 req.mark_expired(self.time)
 
     @staticmethod
