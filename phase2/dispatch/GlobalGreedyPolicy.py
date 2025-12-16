@@ -9,6 +9,15 @@ class GlobalGreedyPolicy(DispatchPolicy):
         """
         build all (idle driver, waiting request) pairs, sort by distance,
         and match greedily while avoiding reuse of drivers and requests
+
+        Args:
+            drivers (list[Driver]): List of available drivers
+            requests (list[Request]): List of pending requests
+            time (int): Current time step
+            run_id (str): Unique identifier for the simulation run
+
+        Returns:
+            Proposed (driver, request) pairs for this tick.
         """
         # Get lists of idle drivers and waiting requests
         idle_drivers = [driver for driver in drivers if driver.status.value == DriverStatus.IDLE.value]

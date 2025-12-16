@@ -1,8 +1,10 @@
 from __future__ import annotations
-from typing import Union
+
 import math
+from typing import Union
 
 Number = Union[int, float]
+
 
 class Point:
     def __init__(self, x: Number, y: Number) -> None:

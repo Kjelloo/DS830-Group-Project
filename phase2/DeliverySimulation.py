@@ -29,8 +29,6 @@ class DeliverySimulation:
                  timeout: int,
                  statistics: dict,
                  run_id: str) -> None:
-
-        # Type checking
         if not isinstance(time, int):
             raise TypeError("time must be int")
         if not isinstance(width, int):
@@ -101,7 +99,6 @@ class DeliverySimulation:
         # Compute proposed assignments via dispatch_policy
         proposals = self.dispatch_policy.assign(drivers=self.drivers, requests=self.requests, time=self.time,
                                                 run_id=self.run_id)
-
 
         offers = self._create_offers(proposals)
 
@@ -183,6 +180,10 @@ class DeliverySimulation:
     def _create_offers(proposals: list[tuple[Driver, Request]]) -> list[Offer]:
         """
         Create offers based on proposals.
+        Args:
+            proposals (list[tuple[Driver, Request]]): Proposed (driver, request) pairs
+        Returns:
+            list[Offer]: List of created offers
         """
         offers = []
 
@@ -201,8 +202,12 @@ class DeliverySimulation:
     def _assign_and_resolve_offers(self, offers: list[Offer]) -> None:
         """
         Offer and resolve offers, and finalise assignments based on driver responses
-        """
 
+        Args:
+            offers (list[Offer]): List of created offers
+        Returns:
+            None
+        """
         # Initialize data structures to keep track of busy drivers and accepted requests
         busy_drivers = set()
         accepted_requests = set()
@@ -235,6 +240,13 @@ class DeliverySimulation:
     def _move_drivers(self, drivers: list[Driver], dt: float) -> None:
         """
         Move drivers and handle pickup/dropoff events.
+
+        Args:
+            drivers (list[Driver]): List of drivers to move
+            dt (float): Time delta for the movement step
+
+        Returns:
+            None
         """
         for driver in drivers:
             # Handle idle drivers
@@ -244,7 +256,8 @@ class DeliverySimulation:
                                                    event_type=EventType.DRIVER_IDLE,
                                                    driver_id=driver.id,
                                                    request_id=None,
-                                                   wait_time=driver.idle_time))
+                                                   wait_time=driver.idle_time,
+                                                   behaviour_name=None))
                 continue
 
             driver.idle_time = 0  # Reset idle time if driver is not idle
@@ -267,6 +280,12 @@ class DeliverySimulation:
     def _mutate_drivers(self, drivers: list[Driver], time: int) -> None:
         """
         Apply mutation_rule to each driver.
+
+        Args:
+            drivers (list[Driver]): List of drivers to potentially mutate
+            time (int): Current time step
+        Returns:
+            None
         """
         for driver in drivers:
             self.mutation_rule.maybe_mutate(driver, time)

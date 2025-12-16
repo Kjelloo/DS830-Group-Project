@@ -40,10 +40,10 @@ class MutationRule:
         """
 
         if random() < 0.02:
-            self.__mutate_driver(driver, time) # switch behaviour randomly sometimes
+            self.__mutate_driver(driver, time)  # switch behaviour randomly sometimes
             return
 
-        if len(driver.history) < self.n_trips: # don't switch behaviour if history is short
+        if len(driver.history) < self.n_trips:  # don't switch behaviour if history is short
             return
 
         if type(driver.behaviour) == EarningsMaxBehaviour:
@@ -51,8 +51,8 @@ class MutationRule:
             expired_trips = [trips for trips in last_n_trips if trips.status == RequestStatus.EXPIRED]
 
             if len(expired_trips) / self.n_trips >= self.threshold:
-                self.__mutate_driver(driver, time) # switch to a less optimal behaviour
-            if random() < 0.05: # 5% of the time, switch to a less optimal behaviour
+                self.__mutate_driver(driver, time)  # switch to a less optimal behaviour
+            if random() < 0.05:  # 5% of the time, switch to a less optimal behaviour
                 self.__mutate_driver(driver, time)
 
         if type(driver.behaviour) == GreedyDistanceBehaviour:
@@ -61,6 +61,13 @@ class MutationRule:
     def __mutate_driver(self, driver: Driver, time: int) -> None:
         """
         Mutate the driver's behaviour parameters.
+
+        Args:
+            driver (Driver): The driver whose behaviour is to be mutated.
+            time (int): The current simulation time, used for event logging.
+
+        Returns:
+            None
         """
         eventManager = EventManager(self.run_id)
 

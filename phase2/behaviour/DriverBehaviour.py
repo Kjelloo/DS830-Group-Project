@@ -13,10 +13,10 @@ class DriverBehaviour(ABC):
     def decide(self, driver: Driver, offer: Offer, time: int, run_id: str) -> bool:
         """
         Args:
-            driver: Driver instance
-            offer: Offer on which the driver should decide
-            time: Current time step
-            run_id: Unique identifier for the simulation run
+            driver (Driver): Driver instance
+            offer (Offer): Offer on which the driver should decide
+            time (int): Current time step
+            run_id (str): Unique identifier for the simulation run
 
         Returns:
             True if the driver accepts the offer, False otherwise.

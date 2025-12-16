@@ -41,10 +41,10 @@ class RequestGenerator:
 
     def maybe_generate(self, time):
         """
-        Called once per tick.
+        Create new requests for the current tick, based on rate.
 
-        Returns a list of new Request objects whose creation_time == time.
-        The number of new requests is based on self.rate.
+        Args:
+            time (int | float): Current simulation time.
         """
         eventManager = EventManager(self.run_id)
 
@@ -86,7 +86,7 @@ class RequestGenerator:
                 run_id=self.run_id,
             )
 
-            eventManager.add_event(Event(time, EventType.REQUEST_GENERATED, None, req.id, None))
+            eventManager.add_event(Event(time, EventType.REQUEST_GENERATED, None, req.id, None, behaviour_name=None))
             new_requests.append(req)
             self.next_id += 1
 
