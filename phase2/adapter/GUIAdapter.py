@@ -149,7 +149,8 @@ class GUIAdapter:
 
     def _apply_new_run_id(self, new_run_id: str) -> None:
         """
-        Small helper to push a new run_id everywhere. Keeps code readable.
+        Small helper to push a new run_id everywhere.
+        This is needed when the user initializes a new simulation, to avoid reusing the same CSV file.
         """
         self.run_id = new_run_id
         self.simulation.run_id = new_run_id
@@ -175,11 +176,7 @@ class GUIAdapter:
                    height: int = 30) -> dict:
         """
         Initialize the DeliverySimulation and return the UI state dict.
-
-        Also, each time init is called, we create a fresh run_id so metrics
-        are written to a new CSV file.
         """
-        # New run id on every init
         new_run_id = datetime.datetime.now().strftime("%H%M%S_%d%m%y")
         self._apply_new_run_id(new_run_id)
 
