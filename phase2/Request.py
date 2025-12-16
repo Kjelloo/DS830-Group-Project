@@ -7,7 +7,6 @@ from phase2.metrics.Event import Event, EventType
 from phase2.metrics.EventManager import EventManager
 
 
-
 class RequestStatus(Enum):
     WAITING = 1
     ASSIGNED = 2
@@ -57,29 +56,53 @@ class Request:
     def mark_assigned(self, driver_id: int, time: int) -> None:
         """
         Marks the request as assigned.
+        Args:
+            driver_id (int): ID of the assigned driver
+            time (int): Current time step
         """
         self.assigned_driver = driver_id
         self.status = RequestStatus.ASSIGNED
 
-        self.eventManager.add_event(Event(time, EventType.REQUEST_ASSIGNED, driver_id, self.id, None))
+        self.eventManager.add_event(Event(time, EventType.REQUEST_ASSIGNED, driver_id, self.id, None, None))
 
     def mark_picked(self, time: int) -> None:
+        """
+        Marks the request as picked.
+
+        Args:
+            time (int): Current time step
+        """
         self.status = RequestStatus.PICKED
 
-        self.eventManager.add_event(Event(time, EventType.REQUEST_PICKED, self.assigned_driver, self.id, None))
+        self.eventManager.add_event(Event(time, EventType.REQUEST_PICKED, self.assigned_driver, self.id, None, None))
 
     def mark_delivered(self, time: int) -> None:
+        """
+        Marks the request as delivered.
+
+        Args:
+            time (int): Current time step
+        """
         self.status = RequestStatus.DELIVERED
 
-        self.eventManager.add_event(Event(time, EventType.REQUEST_DELIVERED, self.assigned_driver, self.id, None))
+        self.eventManager.add_event(Event(time, EventType.REQUEST_DELIVERED, self.assigned_driver, self.id, None, None))
 
     def mark_expired(self, time: int) -> None:
+        """
+        Marks the request as expired.
+
+        Args:
+            time (int): Current time step
+        """
         self.status = RequestStatus.EXPIRED
 
-        self.eventManager.add_event(Event(time, EventType.REQUEST_EXPIRED, None, self.id, None))
+        self.eventManager.add_event(Event(time, EventType.REQUEST_EXPIRED, None, self.id, None, None))
 
     def update_wait(self, current_time: int) -> None:
         """
         Updates wait_time according to current_time.
+
+        Args:
+            current_time (int): Current time step
         """
         self.wait_time = current_time - self.creation_time

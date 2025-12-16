@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import datetime
 from random import choice
 
 from phase2.DeliverySimulation import DeliverySimulation
@@ -29,6 +28,12 @@ class GUIAdapter:
     def load_drivers(self, path: str) -> list[dict]:
         """
         Load drivers from a simple CSV and return a list of UI driver dicts.
+
+        Args:
+            path (str): Path to the CSV file containing driver data.
+
+        Returns:
+            list[dict]: A list of driver dictionaries in UI format.
         """
         drivers: list[dict] = []
 
@@ -67,6 +72,12 @@ class GUIAdapter:
     def load_requests(self, path: str) -> list[dict]:
         """
         Load requests from a CSV and return a list of UI request dicts.
+
+        Args:
+            path (str): Path to the CSV file containing request data.
+
+        Returns:
+            list[dict]: A list of request dictionaries in UI format.
         """
         requests = []
 
@@ -89,7 +100,7 @@ class GUIAdapter:
                             0 <= request_data['pickup y'] <= self.simulation.height and
                             0 <= request_data['delivery x'] <= self.simulation.width and
                             0 <= request_data['delivery y'] <= self.simulation.height):
-                        # Build a structured request dictionary following the defined schema
+                        # Build a structured request dictionary following the UI format
                         request = {
                             'id': i,
                             't': request_data['#request time'],
@@ -111,6 +122,14 @@ class GUIAdapter:
     def generate_drivers(self, n: int, width: int = 50, height: int = 30) -> list[dict]:
         """
         Return `n` randomly generated drivers as UI dicts.
+
+        Args:
+            n (int): Number of drivers to generate.
+            width (int): Width of the simulation area.
+            height (int): Height of the simulation area.
+
+        Returns:
+            list[dict]: A list of driver dictionaries in UI format.
         """
         out: list[dict] = []
         gen = DriverGenerator(run_id=self.run_id)
@@ -129,10 +148,18 @@ class GUIAdapter:
                           req_rate: float,
                           width: int = 50,
                           height: int = 30) -> None:
-        """Append generated request dicts into `out_list` (UI format).
+        """
+        Append generated request dicts into `out_list` (UI format).
 
         This matches the signature the UI expects: the generator should append
         plain dicts describing requests.
+
+        Args:
+            start_t (int): The simulation time to generate requests for.
+            out_list (list): The list to append generated request dicts to.
+            req_rate (float): The request generation rate.
+            width (int): Width of the simulation area.
+            height (int): Height of the simulation area.
         """
         gen = RequestGenerator(rate=req_rate, width=width, height=height, start_id=1, run_id=self.run_id)
         new = gen.maybe_generate(start_t)
@@ -147,26 +174,6 @@ class GUIAdapter:
                 'status': r.status.name.lower()
             })
 
-    def _apply_new_run_id(self, new_run_id: str) -> None:
-        """
-        Small helper to push a new run_id everywhere.
-        This is needed when the user initializes a new simulation, to avoid reusing the same CSV file.
-        """
-        self.run_id = new_run_id
-        self.simulation.run_id = new_run_id
-        # Recreate EventManager so new events go into a fresh CSV
-        self.simulation.event_manager = EventManager(new_run_id)
-        # Update generators and rules
-        if self.simulation.request_generator is not None:
-            self.simulation.request_generator.run_id = new_run_id
-        if self.simulation.mutation_rule is not None:
-            self.simulation.mutation_rule.run_id = new_run_id
-        # Update existing domain objects
-        for d in self.simulation.drivers:
-            d.run_id = new_run_id
-        for r in self.simulation.requests:
-            r.run_id = new_run_id
-
     def init_state(self,
                    drivers: list[dict],
                    requests: list[dict],
@@ -176,9 +183,19 @@ class GUIAdapter:
                    height: int = 30) -> dict:
         """
         Initialize the DeliverySimulation and return the UI state dict.
+        Args:
+            drivers (list[dict]): List of driver dicts in UI format.
+            requests (list[dict]): List of request dicts in UI format.
+            timeout (int): Request timeout in ticks.
+            req_rate (float): Request generation rate.
+            width (int): Width of the simulation area.
+            height (int): Height of the simulation area.
+
+        Returns:
+            dict: The initial state of the simulation in UI format.
         """
-        new_run_id = datetime.datetime.now().strftime("%H%M%S_%d%m%y")
-        self._apply_new_run_id(new_run_id)
+        # Clear any existing events, to avoid mixing runs
+        self.simulation.event_manager.clear_events()
 
         # Convert UI dicts to domain objects
         drv_objs: list[Driver] = [self._dict_to_driver(d) for d in drivers]
@@ -244,10 +261,15 @@ class GUIAdapter:
     def simulate_step(self, state: dict) -> tuple[dict, dict]:
         """
         Advance the simulation by one tick and return (state, metrics).
+
+        Args:
+            state (dict): Current simulation state in UI format.
+
+        Returns:
+            tuple[dict, dict]: A tuple containing the new state and metrics dictionaries.
         """
         self.simulation.tick()
 
-        # Build drivers list from actual Driver objects so we can include richer fields
         ui_drivers = []
 
         for d in self.simulation.drivers:
@@ -316,6 +338,9 @@ class GUIAdapter:
     def get_plot_data(self) -> dict:
         """
         Return plotting positions for drivers and requests.
+
+        Returns:
+            dict: A dictionary containing driver and request positions.
         """
         drivers_data: list[dict] = []
         for driver in self.simulation.drivers:
@@ -343,6 +368,15 @@ class GUIAdapter:
         }
 
     def _dict_to_driver(self, driver: dict) -> Driver:
+        """
+        Convert a UI driver dict to a Driver object.
+
+        Args:
+            driver (dict): Driver dictionary in UI format.
+
+        Returns:
+            Driver: The corresponding Driver object.
+        """
         if isinstance(driver, Driver):
             return driver
 
@@ -370,9 +404,16 @@ class GUIAdapter:
                       history=[],
                       run_id=self.run_id)
 
-
-
     def _dict_to_request(self, request: dict) -> Request:
+        """
+        Convert a UI request dict to a Request object.
+
+        Args:
+            request (dict): Request dictionary in UI format.
+
+        Returns:
+            Request: The corresponding Request object.
+        """
         if isinstance(request, Request):
             return request
 
@@ -406,9 +447,16 @@ class GUIAdapter:
             run_id=self.run_id,
         )
 
-
-
     def _driver_to_dict(self, d: Driver) -> dict:
+        """
+        Convert a Driver object to a UI driver dict.
+
+        Args:
+            d (Driver): The Driver object to convert.
+
+        Returns:
+            dict: The corresponding driver dictionary in UI format.
+        """
         dir_vector = d.dir_vector if d.dir_vector is not None else (0.0, 0.0)
         target_pt = d.target_point()
 

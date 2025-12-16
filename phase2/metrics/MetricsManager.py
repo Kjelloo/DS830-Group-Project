@@ -1,7 +1,6 @@
 import os
 
 import matplotlib.pyplot as plt
-import dearpygui.dearpygui as dpg
 
 from phase2.metrics.Event import EventType
 from phase2.metrics.EventManager import EventManager
@@ -130,7 +129,7 @@ class MetricsManager:
         # Count mutations per driver from events
         events = self.event_manager.get_events_by_type(EventType.BEHAVIOUR_CHANGED)
         if not events:
-            print("No BEHAVIOUR_CHANGED events recorded; skipping Driver Mutations plot.")
+            print("No BEHAVIOUR_CHANGED events recorded. Skipping Driver Mutations plot.")
             return
 
         counts = {}
@@ -169,7 +168,7 @@ class MetricsManager:
         """Plot cumulative deliveries grouped by driver behaviour over time.
 
         For each delivery event, we look up the driver's behaviour active at that
-        timestamp by scanning that driver's behaviour change events (which include the
+        tick by scanning that driver's behaviour change events (which include the
         behaviour name). We then increment the cumulative count for that behaviour and
         record a snapshot. The result is a set of lines that grow over time, one per
         behaviour (EarningsMaxBehaviour, GreedyDistanceBehaviour, LazyBehaviour).

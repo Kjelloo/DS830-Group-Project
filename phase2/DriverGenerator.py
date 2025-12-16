@@ -14,6 +14,16 @@ class DriverGenerator:
     def generate(self, amount: int, width: int, height: int, speed: float, start_id: int) -> list[Driver]:
         """
         Generate a list of Driver objects with random positions within the map.
+
+        Args:
+            amount (int): Number of drivers to generate.
+            width (int): Width of the map.
+            height (int): Height of the map.
+            speed (float): Speed of the drivers.
+            start_id (int): Starting ID for the drivers.
+
+        Returns:
+            list[Driver]: List of generated Driver objects.
         """
         drivers = []
         for _ in range(amount):

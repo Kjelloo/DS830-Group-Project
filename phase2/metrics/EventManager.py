@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import os
 
 from phase2.metrics.Event import Event, EventType
@@ -29,7 +30,12 @@ class EventManager:
                         "wait_time, "
                         "behaviour_name\n")
 
-    def add_event(self, event: Event):
+    def add_event(self, event: Event) -> None:
+        """
+        Add an event to the CSV file.
+        Args:
+            event (Event): Event instance to be added
+        """
         # Append the event to csv file
         if "test_run" in self.filepath:
             return
@@ -48,7 +54,13 @@ class EventManager:
                             wait_time=event.wait_time,
                             behaviour_name=event.behaviour_name if event.behaviour_name is not None else 'None') + '\n')
 
-    def get_events(self):
+    def get_events(self) -> list[Event]:
+        """
+        Retrieve all events from the CSV file.
+
+        Returns:
+            List[Event]: List of Event instances
+        """
         with open(self.filepath, 'r') as f:
             lines = f.readlines()
             # Skip header line if present
@@ -60,7 +72,6 @@ class EventManager:
                 if not line:
                     continue
                 values = line.split(', ')
-                # Require 6 fields (new format)
                 if len(values) != 6:
                     continue
                 ts, et, did, rid, wt, behaviour_name = values
@@ -77,7 +88,29 @@ class EventManager:
                 events.append(event)
             return events
 
-    def get_events_by_type(self, status: EventType):
+    def get_events_by_type(self, status: EventType) -> list[Event]:
+        """
+        Retrieve events filtered by event type.
+
+        Args:
+            status (EventType): EventType to filter by
+        Returns:
+            List[Event]: List of Event instances matching the specified type
+        """
         events = self.get_events()
         filtered_events = [event for event in events if event.event_type == status]
         return filtered_events
+
+    def clear_events(self):
+        """
+        Clear all events from the CSV file by overwriting it with just the header.
+        """
+        if "test_run" in self.filepath:
+            return
+        with open(self.filepath, 'w') as f:
+            f.write("timestamp, "
+                    "event_type, "
+                    "driver_id, "
+                    "request_id, "
+                    "wait_time, "
+                    "behaviour_name\n")

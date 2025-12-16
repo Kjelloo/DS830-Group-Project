@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import math
 from enum import Enum
 
@@ -63,6 +64,9 @@ class Driver:
         return self.__str__()
 
     def compute_direction_vector(self) -> None:
+        """
+        Computes and sets the direction vector towards the current target.
+        """
         target = self.target_point()
         if target is not None:
             dx = target.x - self.position.x
@@ -77,6 +81,13 @@ class Driver:
             return
 
     def assign_request(self, request: Request, current_time: int) -> None:
+        """
+        Assigns a new request to the driver.
+
+        Args:
+            request (Request): The request to assign.
+            current_time (int): The current time step.
+        """
         if not isinstance(request, Request):
             raise TypeError(f"request must be Request, got {type(request).__name__}")
         if not isinstance(current_time, int):
@@ -105,6 +116,9 @@ class Driver:
     def step(self, dt: float | int) -> None:
         """
         Moves the driver towards the current target according to speed and time step dt.
+
+        Args:
+            dt (float | int): The time step for the movement.
         """
         if not isinstance(dt, (float, int)):
             raise TypeError(f"dt must be int/float, got {type(dt).__name__}")
@@ -118,6 +132,9 @@ class Driver:
     def within_one_step_of_target(self) -> bool:
         """
         Checks if the driver is within one step of the target point.
+
+        Returns:
+            True if within one step of target, False otherwise.
         """
         if self.target_point() is None:
             return False
@@ -127,6 +144,9 @@ class Driver:
     def expire_current_request(self, time: int) -> None:
         """
         Expires the current request.
+
+        Args:
+            time (int): The current time step.
         """
         if self.current_request is not None:
             self.current_request.mark_expired(time)
@@ -138,6 +158,9 @@ class Driver:
     def complete_pickup(self, time: int) -> None:
         """
         Updates the internal state when the pickup is reached.
+
+        Args:
+            time (int): The current time step.
         """
         if not isinstance(time, int):
             raise TypeError(f"time must be int, got {type(time).__name__}")
@@ -149,6 +172,9 @@ class Driver:
     def complete_dropoff(self, time: int) -> None:
         """
         Updates the internal state and history when the dropoff is reached.
+
+        Args:
+            time (int): The current time step.
         """
         if not isinstance(time, int):
             raise TypeError(f"time must be int, got {type(time).__name__}")
@@ -162,17 +188,27 @@ class Driver:
     def calc_estimated_total_dist_to_delivery(self, request: Request) -> float:
         """
         Calculates the estimated travel time tics for a given request.
+        Args:
+            request (Request): The request for which to calculate the distance.
         """
         if not isinstance(request, Request):
             raise TypeError(f"request must be Request, got {type(request).__name__}")
 
-        d1 = self.position.distance_to(request.pickup) # distance to pickup
-        d2 = request.pickup.distance_to(request.dropoff) # distance from pickup to dropoff
+        d1 = self.position.distance_to(request.pickup)  # distance to pickup
+        d2 = request.pickup.distance_to(request.dropoff)  # distance from pickup to dropoff
         return d1 + d2
 
     def calc_estimated_delivery_reward(self, request: Request) -> float:
+        """
+        Calculates the estimated reward for a given request.
+
+        Args:
+            request (Request): The request for which to calculate the reward.
+        Returns:
+            Estimated reward for the request.
+        """
         if not isinstance(request, Request):
-                raise TypeError(f"request must be Request, got {type(request).__name__}")
+            raise TypeError(f"request must be Request, got {type(request).__name__}")
 
         base_reward = 15
         reward_per_distance = 2

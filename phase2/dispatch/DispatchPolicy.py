@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
 
 from phase2.Driver import Driver
@@ -12,6 +13,12 @@ class DispatchPolicy(ABC):
                time: int,
                run_id: str) -> list[tuple[Driver, Request]]:
         """
+        Args:
+            drivers (list[Driver]): List of available drivers
+            requests (list[Request]): List of pending requests
+            time (int): Current time step
+            run_id (str): Unique identifier for the simulation run
+
         Returns:
             Proposed (driver, request) pairs for this tick.
         """

@@ -13,9 +13,9 @@ class EventType(Enum):
     REQUEST_EXPIRED = 5
     REQUEST_PICKED = 6
     REQUEST_DELIVERED = 7
-    BEHAVIOUR_CHANGED = 8 # Behaviour when a driver changes behaviour
+    BEHAVIOUR_CHANGED = 8  # Behaviour when a driver changes behaviour
     DRIVER_IDLE = 9
-    DRIVER_GENERATED_BEHAVIOUR = 10 # Behaviour when a driver is generated
+    DRIVER_GENERATED_BEHAVIOUR = 10  # Behaviour when a driver is generated
 
 
 @dataclass
@@ -32,9 +32,6 @@ class Event:
         if not isinstance(self.event_type, EventType):
             raise TypeError("event_type must be an instance of EventType Enum")
 
-        if not isinstance(self.event_type, EventType):
-            raise TypeError("event_type must be EventType")
-
         if not isinstance(self.timestamp, int):
             raise TypeError("timestamp must be int")
 
@@ -42,5 +39,6 @@ class Event:
             value = getattr(self, attr)
             if value is not None and not isinstance(value, int):
                 raise TypeError(f"{attr} must be int or None")
+
         if self.behaviour_name is not None and not isinstance(self.behaviour_name, str):
             raise TypeError("behaviour_name must be str or None")
