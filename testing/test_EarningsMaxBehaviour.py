@@ -21,7 +21,7 @@ class TestEarningsMaxBehaviour(unittest.TestCase):
 
     @patch("phase2.behaviour.EarningsMaxBehaviour.EventManager")
     def test_accepts_offer_when_ratio_meets_threshold(self, mock_event_manager):
-        offer = Offer(self.driver, self.request, 5, 10)
+        offer = Offer(self.driver, self.request, 5, 10, 15)
 
         event_manager_instance = MagicMock()
         mock_event_manager.return_value = event_manager_instance
@@ -46,7 +46,7 @@ class TestEarningsMaxBehaviour(unittest.TestCase):
 
     @patch("phase2.behaviour.EarningsMaxBehaviour.EventManager")
     def test_denies_offer_when_ratio_below_threshold(self, mock_event_manager):
-        offer = Offer(self.driver, self.request, 10, 5)
+        offer = Offer(self.driver, self.request, 10, 5, 2)
 
         event_manager_instance = MagicMock()
         mock_event_manager.return_value = event_manager_instance

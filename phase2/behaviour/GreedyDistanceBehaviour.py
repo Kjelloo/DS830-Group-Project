@@ -14,21 +14,11 @@ class GreedyDistanceBehaviour(DriverBehaviour):
         """
         eventManager = EventManager(run_id)
 
-        # Set the threshold for the quotient of distance to the pickup point / total
-        # distance the driver can travel in x ticks. If the quotient is larger than
-        # that, return False, else return True.
-        threshold = 0.33
+        # hardcode distance to pickup threshold
+        threshold = 21.2 # ~ avg dist between two points in 50x30 grid
+        threshold *= 0.9 # scalar found by testing with varying parameters
 
-        # Fix x: the amount of ticks the quotient will be based on.
-        x = 30
-
-        # Get distance driver can travel in x ticks.
-        traversable_distance = driver.speed * x
-
-        # Get distance to pickup point.
-        dist_to_pickup = driver.position.distance_to(offer.request.pickup)
-
-        if (dist_to_pickup / traversable_distance) < threshold:
+        if offer.estimated_distance_to_pickup < threshold:
             eventManager.add_event(Event(time, EventType.REQUEST_PROPOSAL_ACCEPTED, driver.id, offer.request.id, None))
             return True
         else:

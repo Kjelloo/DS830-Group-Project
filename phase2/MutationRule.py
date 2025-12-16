@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from random import choice
+from random import random
 
 from phase2.Driver import Driver
 from phase2.Request import RequestStatus
@@ -38,15 +39,24 @@ class MutationRule:
             time (int): The current simulation time, used for event logging.
         """
 
-        if len(driver.history) < self.n_trips:
-            pass
+        if random() < 0.02:
+            self.__mutate_driver(driver, time) # switch behaviour randomly sometimes
+            return
 
-        # Performance based: if some percentage (threshold) of the last n trip did not deliver on time, change behaviour
-        last_n_trips = driver.history[-self.n_trips:]
-        expired_trips = [trips for trips in last_n_trips if trips.status == RequestStatus.EXPIRED]
+        if len(driver.history) < self.n_trips: # don't switch behaviour if history is short
+            return
 
-        if len(expired_trips) / self.n_trips >= self.threshold:
-            self.__mutate_driver(driver, time)
+        if type(driver.behaviour) == EarningsMaxBehaviour:
+            last_n_trips = driver.history[-self.n_trips:]
+            expired_trips = [trips for trips in last_n_trips if trips.status == RequestStatus.EXPIRED]
+
+            if len(expired_trips) / self.n_trips >= self.threshold:
+                self.__mutate_driver(driver, time) # switch to a less optimal behaviour
+            if random() < 0.05: # 5% of the time, switch to a less optimal behaviour
+                self.__mutate_driver(driver, time)
+
+        if type(driver.behaviour) == GreedyDistanceBehaviour:
+            if random() < (1 - self.threshold): self.__mutate_driver(driver, time)  # switch to a more optimal behaviour
 
     def __mutate_driver(self, driver: Driver, time: int) -> None:
         """
@@ -54,7 +64,6 @@ class MutationRule:
         """
         eventManager = EventManager(self.run_id)
 
-        # TODO: Add LazyBehaviour once implemented
         behaviour_classes = [EarningsMaxBehaviour, GreedyDistanceBehaviour]
         current_type = type(driver.behaviour)
         candidates = [b for b in behaviour_classes if b is not current_type]

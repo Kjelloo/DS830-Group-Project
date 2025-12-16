@@ -5,6 +5,16 @@ from phase2.Request import RequestStatus
 from phase2.behaviour import EarningsMaxBehaviour, GreedyDistanceBehaviour, LazyBehaviour
 from phase2.MutationRule import MutationRule
 
+class FakeTrip:
+    def __init__(self, status):
+        self.status = status
+
+
+class FakeDriver:
+    def __init__(self, driver_id, behaviour, history):
+        self.id = driver_id
+        self.behaviour = behaviour
+        self.history = history
 
 class TestMutationRule(unittest.TestCase):
 
@@ -47,17 +57,6 @@ class TestMutationRule(unittest.TestCase):
         self.assertEqual(repr(rule), str(rule))
 
 
-class FakeTrip:
-    def __init__(self, status):
-        self.status = status
-
-
-class FakeDriver:
-    def __init__(self, driver_id, behaviour, history):
-        self.id = driver_id
-        self.behaviour = behaviour
-        self.history = history
-
 
 class TestMutationRuleMaybeMutate(unittest.TestCase):
 
@@ -68,8 +67,9 @@ class TestMutationRuleMaybeMutate(unittest.TestCase):
             run_id="test_run"
         )
 
+    @patch("phase2.MutationRule.random", return_value=1)
     @patch("phase2.MutationRule.EventManager")
-    def test_does_not_mutate_when_not_enough_trips(self, mock_event_manager):
+    def test_does_not_mutate_when_not_enough_trips(self, mock_event_manager, mock_random):
         driver = FakeDriver(
             driver_id=1,
             behaviour=MagicMock(),
@@ -80,8 +80,9 @@ class TestMutationRuleMaybeMutate(unittest.TestCase):
 
         mock_event_manager.assert_not_called()
 
+    @patch("phase2.MutationRule.random", return_value=1)
     @patch("phase2.MutationRule.EventManager")
-    def test_does_not_mutate_when_expired_ratio_below_threshold(self, mock_event_manager):
+    def test_does_not_mutate_when_expired_ratio_below_threshold(self, mock_event_manager, mock_random):
         history = [
             FakeTrip(RequestStatus.EXPIRED),
             FakeTrip(RequestStatus.DELIVERED),
@@ -91,7 +92,7 @@ class TestMutationRuleMaybeMutate(unittest.TestCase):
 
         driver = FakeDriver(
             driver_id=1,
-            behaviour=MagicMock(),
+            behaviour=EarningsMaxBehaviour,
             history=history
         )
 
@@ -99,10 +100,11 @@ class TestMutationRuleMaybeMutate(unittest.TestCase):
 
         mock_event_manager.assert_not_called()
 
+    @patch("phase2.MutationRule.random", return_value=1)
     @patch("phase2.MutationRule.choice")
     @patch("phase2.MutationRule.EventManager")
     def test_mutates_driver_when_expired_ratio_meets_threshold(
-        self, mock_event_manager, mock_choice
+        self, mock_event_manager, mock_choice, mock_random
     ):
         history = [
             FakeTrip(RequestStatus.EXPIRED),
@@ -110,11 +112,11 @@ class TestMutationRuleMaybeMutate(unittest.TestCase):
             FakeTrip(RequestStatus.DELIVERED),
             FakeTrip(RequestStatus.DELIVERED),
         ]
-        old_behaviour = MagicMock()
-        new_behaviour_class = MagicMock()
+
+        old_behaviour = EarningsMaxBehaviour.EarningsMaxBehaviour()
+        new_behaviour_class = GreedyDistanceBehaviour.GreedyDistanceBehaviour
 
         mock_choice.return_value = new_behaviour_class
-
         event_manager_instance = MagicMock()
         mock_event_manager.return_value = event_manager_instance
 
@@ -123,16 +125,40 @@ class TestMutationRuleMaybeMutate(unittest.TestCase):
             behaviour=old_behaviour,
             history=history
         )
+
         self.rule.maybe_mutate(driver, time=20)
 
-        # Behaviour updated
-        self.assertEqual(driver.behaviour, new_behaviour_class)
+        # Assert behaviour was updated to an instance of the chosen class
+        self.assertIsInstance(driver.behaviour, new_behaviour_class)
 
-        # EventManager created with correct run_id
+        # EventManager created correctly
         mock_event_manager.assert_called_once_with("test_run")
-
-        # Event logged
         event_manager_instance.add_event.assert_called_once()
+
+    @patch("phase2.MutationRule.random.choice")
+    @patch("phase2.MutationRule.random", return_value=0.0)
+    @patch("phase2.MutationRule.EventManager")
+    def test_mutates_driver_when_random_event_occurs(
+            self, mock_event_manager, mock_random, mock_choice
+    ):
+        # Arrange
+        old_behaviour = EarningsMaxBehaviour.EarningsMaxBehaviour()  # instance
+        new_behaviour_class = GreedyDistanceBehaviour.GreedyDistanceBehaviour  # class
+
+        mock_choice.return_value = new_behaviour_class  # choice returns a class
+        mock_event_manager.return_value = MagicMock()  # EventManager instance
+
+        driver = FakeDriver(
+            driver_id=1,
+            behaviour=old_behaviour,
+            history=[]  # history irrelevant for random mutation
+        )
+
+        # Act
+        self.rule.maybe_mutate(driver, time=10)
+
+        # Assert
+        self.assertIsInstance(driver.behaviour, new_behaviour_class)  # instance of class
 
     @patch("phase2.MutationRule.choice")
     @patch("phase2.MutationRule.EventManager")
@@ -162,7 +188,7 @@ class TestMutationRuleMaybeMutate(unittest.TestCase):
 
         self.assertEqual(
             set(chosen_candidates),
-            {GreedyDistanceBehaviour.GreedyDistanceBehaviour, LazyBehaviour.LazyBehaviour}
+            {GreedyDistanceBehaviour.GreedyDistanceBehaviour}
         )
 
 

@@ -41,34 +41,42 @@ class TestEventManager(unittest.TestCase):
         mock_file.assert_called_with("dummy.csv", 'a')
         handle = mock_file()
         handle.write.assert_called_once_with(
-            "5, 1, 1, 2, 10\n"
+            "5, 1, 1, 2, 10, None\n"
         )
 
-    @patch("builtins.open", new_callable=mock_open,
-           read_data="timestamp, event_type, driver_id, request_id, wait_time\n5, 1, 1, 2, 10\n")
+    @patch(
+        "builtins.open",
+        new_callable=mock_open,
+        read_data=
+        "timestamp, event_type, driver_id, request_id, wait_time, behaviour_name\n"
+        "5, 1, 1, 2, 10, None\n"
+    )
     def test_get_events_reads_file(self, mock_file):
         manager = EventManager("test_run")
         manager.filepath = "dummy.csv"
 
         events = manager.get_events()
+
         self.assertEqual(len(events), 1)
+
         event = events[0]
         self.assertEqual(event.timestamp, 5)
         self.assertEqual(event.event_type, EventType.REQUEST_GENERATED)
         self.assertEqual(event.driver_id, 1)
         self.assertEqual(event.request_id, 2)
         self.assertEqual(event.wait_time, 10)
+        self.assertIsNone(event.behaviour_name)
 
     @patch("builtins.open", new_callable=mock_open, read_data=
            "timestamp, event_type, driver_id, request_id, wait_time\n"
-           "5, 1, 1, 2, 10\n"
-           "6, 3, 2, 3, 15\n"
-           "7, 4, None, None, None\n")
+           "5, 1, 1, 2, 10, None\n"
+           "6, 3, 2, 3, 15, None\n"
+           "7, 4, None, None, None, None\n")
     def test_get_event_by_type_filters(self, mock_file):
         manager = EventManager("test_run")
         manager.filepath = "dummy.csv"
 
-        events = manager.get_event_by_type(EventType.REQUEST_PROPOSAL_ACCEPTED)
+        events = manager.get_events_by_type(EventType.REQUEST_PROPOSAL_ACCEPTED)
         self.assertEqual(len(events), 1)
         event = events[0]
         self.assertEqual(event.timestamp, 6)

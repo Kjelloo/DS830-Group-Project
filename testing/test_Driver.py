@@ -1,8 +1,11 @@
 import unittest
+from unittest.mock import MagicMock
+
 from phase2.Point import Point
 from phase2.Driver import Driver, DriverStatus
 from phase2.Request import Request, RequestStatus
 from phase2.behaviour.DriverBehaviour import DriverBehaviour
+from phase2.behaviour.GreedyDistanceBehaviour import GreedyDistanceBehaviour
 
 
 class DummyBehaviour(DriverBehaviour):
@@ -12,9 +15,6 @@ class DummyBehaviour(DriverBehaviour):
 
 class TestDriver(unittest.TestCase):
 
-    # ----------------------------------------------------------------------
-    # initiation
-    # ----------------------------------------------------------------------
     def test_init_valid(self):
         b = DummyBehaviour()
         r = Request(0, Point(0, 0), Point(10, 10),0,
@@ -59,9 +59,6 @@ class TestDriver(unittest.TestCase):
             Driver(1, Point(0, 0), 10.0, DriverStatus.IDLE,
                    None, behaviour, "not list", run_id="test_run")
 
-    # ----------------------------------------------------------------------
-    # target_point
-    # ----------------------------------------------------------------------
     def test_target_point_idle(self):
         b = DummyBehaviour()
         r = None
@@ -94,10 +91,6 @@ class TestDriver(unittest.TestCase):
         with self.assertRaises(AssertionError):
             self.assertEqual(d.target_point(), r.dropoff)
 
-
-    # ----------------------------------------------------------------------
-    # compute_direction_vector
-    # ----------------------------------------------------------------------
     def test_compute_direction_vector_valid(self):
         b = DummyBehaviour()
         r = Request(0, Point(3, 4), Point(10, 10), 0,
@@ -120,9 +113,6 @@ class TestDriver(unittest.TestCase):
         d.compute_direction_vector()
         self.assertIsNone(d.dir_vector)
 
-    # ----------------------------------------------------------------------
-    # assign_request
-    # ----------------------------------------------------------------------
     def test_assign_request_valid(self):
         b = DummyBehaviour()
         r = Request(0, Point(3, 4), Point(10, 10), 0,
@@ -147,9 +137,7 @@ class TestDriver(unittest.TestCase):
         with self.assertRaises(TypeError):
             d.assign_request(r, "time")
 
-    # ----------------------------------------------------------------------
-    # step
-    # ----------------------------------------------------------------------
+
     def test_step_valid(self):
         b = DummyBehaviour()
         r = Request(0, Point(3, 4), Point(10, 10), 0,
@@ -174,9 +162,6 @@ class TestDriver(unittest.TestCase):
         with self.assertRaises(TypeError):
             d.step("1.2")       # dt must be int/float
 
-    # ----------------------------------------------------------------------
-    # complete_pickup
-    # ----------------------------------------------------------------------
     def test_complete_pickup_valid(self):
         b = DummyBehaviour()
         r = Request(0, Point(3, 4), Point(10, 10), 1,
@@ -199,9 +184,6 @@ class TestDriver(unittest.TestCase):
         with self.assertRaises(TypeError):
             d.complete_pickup("bad")
 
-    # ----------------------------------------------------------------------
-    # complete_dropoff
-    # ----------------------------------------------------------------------
     def test_complete_dropoff_valid(self):
         b = DummyBehaviour()
         r = Request(0, Point(3, 4), Point(10, 10), 1,
@@ -214,8 +196,6 @@ class TestDriver(unittest.TestCase):
         self.assertEqual(d.target_point(), None)
         self.assertEqual(d.current_request, None)
 
-
-
     def test_complete_dropoff_invalid(self):
         b = DummyBehaviour()
         r = Request(0, Point(3, 4), Point(10, 10), 1,
@@ -225,42 +205,27 @@ class TestDriver(unittest.TestCase):
         with self.assertRaises(TypeError):
             d.complete_dropoff([])
 
-    # ----------------------------------------------------------------------
-    # calc_delivery_estimated_travel_time
-    # ----------------------------------------------------------------------
-    def test_calc_estimated_travel_time_valid(self):
+    def test_calc_estimated_total_dist_valid(self):
         b = DummyBehaviour()
         r = Request(0, Point(3, 4), Point(7, 7), 1,
                     RequestStatus.WAITING, 0, 0, run_id="test_run")
         d = Driver(1, Point(0, 0), 5.0,
                    DriverStatus.TO_PICKUP, r, b, [], run_id="test_run")
         # distance (0,0)->(3,4)=5, (3,4)->(7,7)=5 → total=10
-        expected = 10 / d.speed
+        expected = 10
 
-        t = d.calc_delivery_estimated_travel_time(r)
+        t = d.calc_estimated_total_dist_to_delivery(r)
         self.assertAlmostEqual(t, expected)
 
-    def test_calc_estimated_travel_time_invalid(self):
+    def test_calc_estimated_total_dist_invalid(self):
         b = DummyBehaviour()
         r = Request(0, Point(3, 4), Point(7, 7), 1,
                     RequestStatus.WAITING, 0, 0, run_id="test_run")
         d = Driver(1, Point(0, 0), 5.0,
                    DriverStatus.TO_PICKUP, r, b, [], run_id="test_run")
         with self.assertRaises(TypeError):
-            d.calc_delivery_estimated_travel_time("bad")
+            d.calc_estimated_total_dist_to_delivery("bad")
 
-    def test_calc_estimated_travel_time_zero_speed(self):
-        b = DummyBehaviour()
-        r = Request(0, Point(3, 4), Point(7, 7), 1,
-                    RequestStatus.WAITING, 0, 0, run_id="test_run")
-        d = Driver(1, Point(0, 0), 0,
-                   DriverStatus.TO_PICKUP, r, b, [], run_id="test_run")
-        with self.assertRaises(ZeroDivisionError):
-            d.calc_delivery_estimated_travel_time(r)
-
-    # ----------------------------------------------------------------------
-    # calc_delivery_estimated_reward
-    # ----------------------------------------------------------------------
     def test_calc_estimated_reward_valid(self):
         b = DummyBehaviour()
         r = Request(0, Point(3, 4), Point(7, 7), 1,
@@ -268,11 +233,11 @@ class TestDriver(unittest.TestCase):
         d = Driver(1, Point(0, 0), 5,
                    DriverStatus.TO_PICKUP, r, b, [], run_id="test_run")
 
-        travel_time = 10 / d.speed
-        expected = 5.0 + 2.0 * travel_time
+        travel_dist = 10
+        expected = 15 + 0.7 * travel_dist
 
-        r = d.calc_delivery_estimated_reward(r)
-        self.assertAlmostEqual(r, expected)
+        actual_reward = d.calc_estimated_delivery_reward(r)
+        self.assertAlmostEqual(actual_reward, expected)
 
     def test_calc_estimated_reward_invalid(self):
         b = DummyBehaviour()
@@ -282,7 +247,53 @@ class TestDriver(unittest.TestCase):
                    DriverStatus.TO_PICKUP, r, b, [], run_id="test_run")
 
         with self.assertRaises(TypeError):
-            d.calc_delivery_estimated_reward([])
+            d.calc_estimated_delivery_reward([])
+
+    # Testing of newly added method expire_current_request
+    def setUp(self):
+        self.driver = Driver(
+            id=1,
+            position=Point(1,1),  # can be mocked
+            speed=1.0,
+            status=DriverStatus.IDLE,
+            current_request=None,
+            behaviour=GreedyDistanceBehaviour(),
+            history=[],
+            run_id="test_run")
+
+    def test_expire_current_request_with_active_request(self):
+        mock_request = MagicMock(spec=Request)
+        self.driver.current_request = mock_request
+        self.driver.status = DriverStatus.TO_PICKUP
+        self.driver.compute_direction_vector = MagicMock()
+
+        time = 10
+
+        self.driver.expire_current_request(time)
+
+        mock_request.mark_expired.assert_called_once_with(time)
+
+        self.assertIn(mock_request, self.driver.history)
+
+        self.assertIsNone(self.driver.current_request)
+
+        self.assertEqual(self.driver.status, DriverStatus.IDLE)
+
+        self.driver.compute_direction_vector.assert_called_once()
+
+    def test_expire_current_request_with_no_active_request(self):
+        self.driver.current_request = None
+        self.driver.compute_direction_vector = MagicMock()
+        original_history = list(self.driver.history)
+        original_status = self.driver.status
+
+        self.driver.expire_current_request(time=10)
+
+        self.assertEqual(self.driver.history, original_history)
+
+        self.assertEqual(self.driver.status, original_status)
+
+        self.driver.compute_direction_vector.assert_not_called()
 
 if __name__ == "__main__":
     unittest.main()
