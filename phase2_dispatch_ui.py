@@ -32,8 +32,8 @@ if __name__ == "__main__":
         drivers=list[Driver](),
         requests=list[Request](),
         mutation_rule=MutationRule(n_trips=5, threshold=0.7, run_id=run_id),
-        dispatch_policy=NearestNeighborPolicy(),
-        #dispatch_policy=GlobalGreedyPolicy(),
+        #dispatch_policy=NearestNeighborPolicy(), # policy 1
+        dispatch_policy=GlobalGreedyPolicy(), # policy 2
         run_id=run_id,
         timeout=30,
         statistics={},

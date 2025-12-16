@@ -175,6 +175,6 @@ class Driver:
                 raise TypeError(f"request must be Request, got {type(request).__name__}")
 
         base_reward = 15
-        reward_per_distance = 0.7
+        reward_per_distance = 2
 
         return base_reward + (reward_per_distance * self.calc_estimated_total_dist_to_delivery(request))
