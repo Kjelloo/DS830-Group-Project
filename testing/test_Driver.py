@@ -234,7 +234,7 @@ class TestDriver(unittest.TestCase):
                    DriverStatus.TO_PICKUP, r, b, [], run_id="test_run")
 
         travel_dist = 10
-        expected = 15 + 0.7 * travel_dist
+        expected = 15 + 2 * travel_dist
 
         actual_reward = d.calc_estimated_delivery_reward(r)
         self.assertAlmostEqual(actual_reward, expected)

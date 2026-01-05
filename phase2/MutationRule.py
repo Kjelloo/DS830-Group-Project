@@ -52,8 +52,10 @@ class MutationRule:
 
             if len(expired_trips) / self.n_trips >= self.threshold:
                 self.__mutate_driver(driver, time)  # switch to a less optimal behaviour
+                return
             if random() < 0.05:  # 5% of the time, switch to a less optimal behaviour
                 self.__mutate_driver(driver, time)
+                return
 
         if type(driver.behaviour) == GreedyDistanceBehaviour:
             if random() < (1 - self.threshold): self.__mutate_driver(driver, time)  # switch to a more optimal behaviour

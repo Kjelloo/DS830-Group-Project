@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 
 from phase2.Request import RequestStatus
-from phase2.behaviour import EarningsMaxBehaviour, GreedyDistanceBehaviour, LazyBehaviour
+from phase2.behaviour import EarningsMaxBehaviour, GreedyDistanceBehaviour
 from phase2.MutationRule import MutationRule
 
 class FakeTrip:
@@ -179,17 +179,16 @@ class TestMutationRuleMaybeMutate(unittest.TestCase):
             history=history
         )
 
-        mock_choice.return_value = MagicMock()
-
         self.rule.maybe_mutate(driver, time=5)
 
-        mock_choice.assert_called_once()
-        chosen_candidates = mock_choice.call_args[0][0]
+        self.assertEqual(mock_choice.call_count, 1)
 
+        first_call_candidates = mock_choice.call_args_list[0][0][0]
         self.assertEqual(
-            set(chosen_candidates),
+            set(first_call_candidates),
             {GreedyDistanceBehaviour.GreedyDistanceBehaviour}
         )
+
 
 
 if __name__ == "__main__":
